@@ -9,6 +9,7 @@ export default function Home() {
   const [preloaderDone, setPreloaderDone] = useState(false);
   const [activeBtn, setActiveBtn] = useState<"portfolio" | "about">("portfolio");
   const navRef = useRef<HTMLElement>(null);
+  const availRef = useRef<HTMLParagraphElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLSpanElement>(null);
@@ -17,29 +18,32 @@ export default function Home() {
     if (!preloaderDone) return;
 
     const nav = navRef.current;
+    const avail = availRef.current;
     const title = titleRef.current;
     const buttons = buttonsRef.current;
     const marker = markerRef.current;
-    if (!nav || !title || !buttons || !marker) return;
+    if (!nav || !avail || !title || !buttons || !marker) return;
 
     const lines = title.querySelectorAll<HTMLElement>(".title-line");
 
     gsap.set(nav, { opacity: 0, y: -16 });
+    gsap.set(avail, { opacity: 0, y: 12 });
     gsap.set(lines, { opacity: 0, y: 28 });
     gsap.set(buttons, { opacity: 0, y: 16 });
     gsap.set(marker, { opacity: 0 });
 
     gsap.to(nav, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", delay: 0.15 });
+    gsap.to(avail, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.18 });
     gsap.to(lines, {
       opacity: 1,
       y: 0,
       duration: 0.65,
       ease: "power3.out",
       stagger: 0.1,
-      delay: 0.2,
+      delay: 0.25,
     });
-    gsap.to(buttons, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", delay: 0.6 });
-    gsap.to(marker, { opacity: 1, duration: 0.5, delay: 0.75 });
+    gsap.to(buttons, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", delay: 0.65 });
+    gsap.to(marker, { opacity: 1, duration: 0.5, delay: 0.8 });
   }, [preloaderDone]);
 
   return (
@@ -74,7 +78,7 @@ export default function Home() {
         />
 
         {/* ── NAV ── */}
-        <nav ref={navRef} className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 md:px-10">
+        <nav ref={navRef} aria-label="Navigation principale" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 md:px-10">
           <span className="text-[12px] font-bold tracking-[0.25em] text-white uppercase">
             Putri Zahara
           </span>
@@ -99,6 +103,10 @@ export default function Home() {
 
         {/* ── MAIN CONTENT ── */}
         <div className="absolute inset-0 z-20 flex flex-col justify-end pb-[28vh] px-6 md:px-10">
+          <p ref={availRef} className="text-white/50 text-[11px] font-mono tracking-[0.3em] uppercase mb-4">
+            Available · Freelance &amp; Full-time
+          </p>
+
           <h1
             ref={titleRef}
             className="text-white font-black uppercase leading-[0.88] tracking-[-0.02em] mb-6"
@@ -135,7 +143,7 @@ export default function Home() {
           </div>
 
           <div className="flex items-end justify-end">
-            <span ref={markerRef} className="text-white/50 text-sm font-mono tracking-widest">::</span>
+            <span ref={markerRef} aria-hidden="true" className="text-white/50 text-sm font-mono tracking-widest">::</span>
           </div>
         </div>
       </div>
