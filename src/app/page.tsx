@@ -50,11 +50,12 @@ export default function Home() {
         className="relative h-screen w-screen overflow-hidden"
         style={{ opacity: preloaderDone ? 1 : 0, transition: "opacity 0.25s ease" }}
       >
-        {/* Background image */}
+        {/* Background image — decorative */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/landingpage/Harbor_thumbnail_final_obi_1920.webp"
-          alt="hero"
+          alt=""
+          aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ filter: "brightness(0.75) contrast(1.05)" }}
           draggable={false}
@@ -74,18 +75,26 @@ export default function Home() {
 
         {/* ── NAV ── */}
         <nav ref={navRef} className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 md:px-10">
-          <span className="text-[11px] font-bold tracking-[0.25em] text-white uppercase">
+          <span className="text-[12px] font-bold tracking-[0.25em] text-white uppercase">
             Putri Zahara
           </span>
 
-          <ul className="flex gap-10 text-[11px] font-bold tracking-[0.2em] text-white uppercase">
-            <li className="cursor-pointer opacity-80 transition-opacity hover:opacity-100">Portfolio</li>
-            <li className="cursor-pointer opacity-80 transition-opacity hover:opacity-100">About</li>
+          <ul className="flex gap-10 text-[12px] font-bold tracking-[0.2em] text-white uppercase">
+            <li>
+              <button className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
+                Portfolio
+              </button>
+            </li>
+            <li>
+              <button className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
+                About
+              </button>
+            </li>
           </ul>
 
-          <span className="text-[11px] font-bold tracking-[0.25em] text-white uppercase cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+          <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase cursor-pointer opacity-80 hover:opacity-100 focus-visible:opacity-100 transition-opacity bg-transparent border-none">
             Contact
-          </span>
+          </button>
         </nav>
 
         {/* ── MAIN CONTENT ── */}
@@ -103,8 +112,9 @@ export default function Home() {
           <div ref={buttonsRef} className="flex items-center gap-5 mb-6">
             <div
               onMouseEnter={() => setActiveBtn("portfolio")}
+              onFocus={() => setActiveBtn("portfolio")}
               style={{
-                opacity: activeBtn === "portfolio" ? 1 : 0.28,
+                opacity: activeBtn === "portfolio" ? 1 : 0.45,
                 transform: activeBtn === "portfolio" ? "scale(1)" : "scale(0.96)",
                 transition: "opacity 0.45s ease, transform 0.45s ease",
               }}
@@ -113,8 +123,9 @@ export default function Home() {
             </div>
             <div
               onMouseEnter={() => setActiveBtn("about")}
+              onFocus={() => setActiveBtn("about")}
               style={{
-                opacity: activeBtn === "about" ? 1 : 0.28,
+                opacity: activeBtn === "about" ? 1 : 0.45,
                 transform: activeBtn === "about" ? "scale(1)" : "scale(0.96)",
                 transition: "opacity 0.45s ease, transform 0.45s ease",
               }}

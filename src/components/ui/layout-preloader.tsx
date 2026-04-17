@@ -87,6 +87,12 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   };
 
   useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setIsVisible(false);
+      onComplete?.();
+      return;
+    }
     timersRef.current = [];
     const boot = setTimeout(runAnimation, 120);
     return () => {
