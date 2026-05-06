@@ -12,7 +12,26 @@
       "Bash(npx shadcn@latest init --defaults)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "mcp__0b32802f-74a0-4ee2-9734-769b33db5955__whoami",
+      "mcp__0b32802f-74a0-4ee2-9734-769b33db5955__create_new_file",
+      "mcp__0b32802f-74a0-4ee2-9734-769b33db5955__use_figma",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc *)",
+      "Bash(dir \"G:\\\\coding\\\\website_putri\\\\public\\\\images\\\\Portfolio\" /b)",
+      "Bash(cwebp -version)",
+      "Bash(node -e \"console.log\\(process.version\\)\")",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['version']\\)\")",
+      "Bash(findstr /i \"TEXCOORD\" \"G:\\\\coding\\\\website_putri\\\\public\\\\asset3D\\\\scene.gltf\")",
+      "Bash(powershell -Command \"Select-String -Path 'G:\\\\coding\\\\website_putri\\\\public\\\\asset3D\\\\scene.gltf' -Pattern 'TEXCOORD' | Select-Object -First 3\")",
+      "Bash(powershell -Command \"Select-String -Path 'G:\\\\coding\\\\website_putri\\\\public\\\\asset3D\\\\scene.gltf' -Pattern 'TEXCOORD' | Measure-Object | Select-Object -ExpandProperty Count\")",
+      "Bash(powershell -Command \"Select-String -Path 'G:\\\\coding\\\\website_putri\\\\public\\\\asset3D\\\\scene.gltf' -Pattern 'images|textures|uri.*webp|uri.*png|uri.*jpg' | Select-Object -First 5\")",
+      "Bash(powershell -Command \"Select-String -Path 'G:\\\\coding\\\\website_putri\\\\public\\\\asset3D\\\\scene.gltf' -Pattern 'TEXCOORD|Display|emissive|baseColorTexture' | Select-Object -First 15 | Format-List LineNumber,Line\")",
+      "Bash(awk -F: '$1>=815 && $1<=915')",
+      "Bash(npx next *)"
     ]
   }
 }

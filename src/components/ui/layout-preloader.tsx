@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 const IMAGES = [
-  "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&q=80",
-  "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+  "/images/landingpage/1E1A1C08-ED86-407D-A752-0091CA984F94_1920.webp",
+  "/images/landingpage/Concept_ville_yirie_1920.webp",
+  "/images/landingpage/Harbor_thumbnail_final_obi_1920.webp",
 ];
 
 interface LayoutPreloaderProps {
@@ -130,19 +130,22 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
         }}
       />
 
-      {/* PUTRI | images | ZAHARA */}
-      <div className="relative z-20 flex w-full items-center justify-center px-6 md:px-12">
+      {/* PUTRI | images | ZAHARA — image dead center via 1fr auto 1fr grid */}
+      <div
+        className="relative z-20 grid w-full items-center px-6 md:px-12"
+        style={{ gridTemplateColumns: "1fr auto 1fr" }}
+      >
         <div
           ref={titleLeftRef}
-          className="select-none font-serif text-[clamp(36px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
+          className="justify-self-end pr-3 select-none font-serif text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
           style={{ opacity: 0 }}
         >
           PUTRI
         </div>
 
         <div
-          className="relative mx-4 flex-shrink-0 overflow-hidden rounded-sm"
-          style={{ width: "clamp(200px,30vw,460px)", height: "clamp(140px,21vw,310px)" }}
+          className="relative flex-shrink-0 overflow-hidden rounded-sm"
+          style={{ width: "clamp(100px,28vw,460px)", height: "clamp(70px,19.6vw,310px)" }}
         >
           {IMAGES.map((src, i) => (
             <div
@@ -159,14 +162,14 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
 
         <div
           ref={titleRightRef}
-          className="select-none font-serif text-[clamp(36px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
+          className="justify-self-start pl-3 select-none font-serif text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
           style={{ opacity: 0 }}
         >
           ZAHARA
         </div>
       </div>
 
-      {/* Loading label */}
+      {/* Loading label — bottom center */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 font-mono text-[10px] tracking-[0.35em] text-neutral-400 uppercase">
         Loading
       </div>

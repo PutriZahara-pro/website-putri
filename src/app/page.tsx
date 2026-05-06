@@ -1,56 +1,92 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { LayoutPreloader } from "@/components/ui/layout-preloader";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import gsap from "gsap";
 
+
 export default function Home() {
+  const router = useRouter();
   const [preloaderDone, setPreloaderDone] = useState(false);
-  const [activeBtn, setActiveBtn] = useState<"portfolio" | "about">("portfolio");
-  const navRef = useRef<HTMLElement>(null);
-  const availRef = useRef<HTMLParagraphElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<HTMLSpanElement>(null);
+  const [activeBtn, setActiveBtn]         = useState<"portfolio" | "about">("portfolio");
+  const navRef      = useRef<HTMLElement>(null);
+  const availRef    = useRef<HTMLParagraphElement>(null);
+  const titleRef    = useRef<HTMLHeadingElement>(null);
+  const buttonsRef  = useRef<HTMLDivElement>(null);
+  const wrapRef     = useRef<HTMLDivElement>(null);
+  const portWrapRef = useRef<HTMLDivElement>(null);
+  const aboutWrapRef= useRef<HTMLDivElement>(null);
+
+  const punchAndGo = useCallback((target: "portfolio" | "about") => {
+    const wrapBtn  = target === "portfolio" ? portWrapRef.current  : aboutWrapRef.current;
+    const path     = target === "portfolio" ? "/portfolio"         : "/about";
+
+    if (wrapBtn) {
+      gsap.fromTo(wrapBtn,
+        { scale: 1 },
+        { scale: 0.92, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1, overwrite: "auto" }
+      );
+    }
+
+    const wrap = wrapRef.current;
+    if (!wrap) { router.push(path); return; }
+    gsap.to(wrap, {
+      opacity: 0,
+      duration: 0.45,
+      ease: "power2.in",
+      delay: 0.22,
+      onComplete: () => router.push(path),
+    });
+  }, [router]);
+
+  const goToPortfolio = useCallback(() => punchAndGo("portfolio"), [punchAndGo]);
+  const goToAbout     = useCallback(() => punchAndGo("about"),     [punchAndGo]);
 
   useEffect(() => {
     if (!preloaderDone) return;
 
-    const nav = navRef.current;
-    const avail = availRef.current;
-    const title = titleRef.current;
+    const nav     = navRef.current;
+    const avail   = availRef.current;
+    const title   = titleRef.current;
     const buttons = buttonsRef.current;
-    const marker = markerRef.current;
-    if (!nav || !avail || !title || !buttons || !marker) return;
+    if (!nav || !avail || !title || !buttons) return;
 
     const lines = title.querySelectorAll<HTMLElement>(".title-line");
 
-    gsap.set(nav, { opacity: 0, y: -16 });
-    gsap.set(avail, { opacity: 0, y: 12 });
-    gsap.set(lines, { opacity: 0, y: 28 });
-    gsap.set(buttons, { opacity: 0, y: 16 });
-    gsap.set(marker, { opacity: 0 });
+    gsap.set(nav,     { opacity: 0, y: -12, filter: "blur(6px)" });
+    gsap.set(avail,   { opacity: 0, y: 14,  filter: "blur(6px)", letterSpacing: "0.55em" });
+    gsap.set(lines,   { opacity: 0, y: 36,  filter: "blur(12px)" });
+    gsap.set(buttons, { opacity: 0, y: 18,  filter: "blur(8px)", scale: 0.96 });
 
-    gsap.to(nav, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", delay: 0.15 });
-    gsap.to(avail, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.18 });
-    gsap.to(lines, {
-      opacity: 1,
-      y: 0,
-      duration: 0.65,
-      ease: "power3.out",
-      stagger: 0.1,
-      delay: 0.25,
+    gsap.to(nav, {
+      opacity: 1, y: 0, filter: "blur(0px)",
+      duration: 1.0, ease: "expo.out", delay: 0.1,
     });
-    gsap.to(buttons, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", delay: 0.65 });
-    gsap.to(marker, { opacity: 1, duration: 0.5, delay: 0.8 });
+    gsap.to(avail, {
+      opacity: 1, y: 0, filter: "blur(0px)", letterSpacing: "0.3em",
+      duration: 1.15, ease: "expo.out", delay: 0.25,
+    });
+    gsap.to(lines, {
+      opacity: 1, y: 0, filter: "blur(0px)",
+      duration: 1.3, ease: "expo.out",
+      stagger: { each: 0.16, from: "start" },
+      delay: 0.45,
+    });
+    gsap.to(buttons, {
+      opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+      duration: 1.1, ease: "expo.out", delay: 1.15,
+    });
   }, [preloaderDone]);
+
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-black">
       <LayoutPreloader onComplete={() => setPreloaderDone(true)} />
 
       <div
+        ref={wrapRef}
         className="relative h-screen w-screen overflow-hidden"
         style={{ opacity: preloaderDone ? 1 : 0, transition: "opacity 0.25s ease" }}
       >
@@ -66,7 +102,7 @@ export default function Home() {
         />
 
         {/* Dark gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
         {/* Vertical grid lines */}
         <div
@@ -78,72 +114,82 @@ export default function Home() {
         />
 
         {/* ── NAV ── */}
-        <nav ref={navRef} aria-label="Navigation principale" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 md:px-10">
+        <nav ref={navRef} aria-label="Navigation principale" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-6 py-5 md:px-10">
           <span className="text-[12px] font-bold tracking-[0.25em] text-white uppercase">
             Putri Zahara
           </span>
-
-          <ul className="flex gap-10 text-[12px] font-bold tracking-[0.2em] text-white uppercase">
+          <ul className="hidden sm:flex gap-10 text-[12px] font-bold tracking-[0.2em] text-white uppercase">
             <li>
-              <button className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
+              <button
+                onClick={goToPortfolio}
+                className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
                 Portfolio
               </button>
             </li>
             <li>
-              <button className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
+              <button
+                onClick={goToAbout}
+                className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
                 About
               </button>
             </li>
           </ul>
-
           <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase cursor-pointer opacity-80 hover:opacity-100 focus-visible:opacity-100 transition-opacity bg-transparent border-none">
             Contact
           </button>
         </nav>
 
+        {/* ── Radial fade behind centered content ── */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-15"
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 48% at 50% 50%, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0) 85%)",
+          }}
+        />
+
         {/* ── MAIN CONTENT ── */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-end pb-[28vh] px-6 md:px-10">
-          <p ref={availRef} className="text-white/50 text-[11px] font-mono tracking-[0.3em] uppercase mb-4">
-            Available · Freelance &amp; Full-time
-          </p>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 sm:px-6 md:px-10">
+          <div className="text-center">
+            <p ref={availRef} className="text-white/55 text-[10px] font-mono tracking-[0.3em] uppercase mb-4">
+              Available · Freelance &amp; Full-time
+            </p>
 
-          <h1
-            ref={titleRef}
-            className="text-white font-black uppercase leading-[0.88] tracking-[-0.02em] mb-6"
-            style={{ fontSize: "clamp(38px, 7.5vw, 108px)" }}
-          >
-            <span className="title-line block">Concept</span>
-            <span className="title-line block">Artist &amp;</span>
-            <span className="title-line block">UI/UX Designer</span>
-          </h1>
-
-          <div ref={buttonsRef} className="flex items-center gap-5 mb-6">
-            <div
-              onMouseEnter={() => setActiveBtn("portfolio")}
-              onFocus={() => setActiveBtn("portfolio")}
-              style={{
-                opacity: activeBtn === "portfolio" ? 1 : 0.45,
-                transform: activeBtn === "portfolio" ? "scale(1)" : "scale(0.96)",
-                transition: "opacity 0.45s ease, transform 0.45s ease",
-              }}
+            <h1
+              ref={titleRef}
+              className="text-white font-black uppercase leading-none tracking-[-0.02em] mb-6 sm:mb-8"
+              style={{ fontSize: "clamp(38px, 7.5vw, 108px)" }}
             >
-              <LiquidMetalButton label="Portfolio" active={activeBtn === "portfolio"} />
-            </div>
-            <div
-              onMouseEnter={() => setActiveBtn("about")}
-              onFocus={() => setActiveBtn("about")}
-              style={{
-                opacity: activeBtn === "about" ? 1 : 0.45,
-                transform: activeBtn === "about" ? "scale(1)" : "scale(0.96)",
-                transition: "opacity 0.45s ease, transform 0.45s ease",
-              }}
-            >
-              <LiquidMetalButton label="About Me" active={activeBtn === "about"} />
-            </div>
-          </div>
+              <span className="title-line block">Concept</span>
+              <span className="title-line block">Artist &amp;</span>
+              <span className="title-line block">UI/UX Designer</span>
+            </h1>
 
-          <div className="flex items-end justify-end">
-            <span ref={markerRef} aria-hidden="true" className="text-white/50 text-sm font-mono tracking-widest">::</span>
+            <div ref={buttonsRef} className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+              <div
+                ref={portWrapRef}
+                onMouseEnter={() => setActiveBtn("portfolio")}
+                onFocus={() => setActiveBtn("portfolio")}
+                style={{
+                  opacity:    activeBtn === "portfolio" ? 1 : 0.4,
+                  transition: "opacity 0.45s ease",
+                }}
+              >
+                <LiquidMetalButton label="Portfolio" active={activeBtn === "portfolio"} onClick={goToPortfolio} />
+              </div>
+              <div
+                ref={aboutWrapRef}
+                onMouseEnter={() => setActiveBtn("about")}
+                onFocus={() => setActiveBtn("about")}
+                style={{
+                  opacity:    activeBtn === "about" ? 1 : 0.4,
+                  transition: "opacity 0.45s ease",
+                }}
+              >
+                <LiquidMetalButton label="About Me" active={activeBtn === "about"} onClick={goToAbout} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
