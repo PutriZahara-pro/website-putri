@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 // Simple in-memory rate limiter (resets on cold start)
 const rateLimitMap = new Map<string, { count: number; ts: number }>();
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Send email via Resend
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: "Portfolio Contact <onboarding@resend.dev>",
     to: process.env.CONTACT_EMAIL!,
     replyTo: email,
