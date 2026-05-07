@@ -529,6 +529,16 @@ function SliderView({
   const liveIdxRef = useRef(activeIdx);
   useEffect(() => { liveIdxRef.current = activeIdx; }, [activeIdx]);
 
+  // Track active drag's onUp handler — called on unmount to clean up listeners
+  const activeUpRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    return () => {
+      activeUpRef.current?.();
+      document.body.style.cursor     = "";
+      document.body.style.userSelect = "";
+    };
+  }, []);
+
   const DRAG_ACTIVATE_PX = 8; // px before drag mode activates (below = click)
 
   const startCarouselDrag = useCallback((clientX: number) => {
@@ -604,6 +614,7 @@ function SliderView({
       document.removeEventListener("touchmove",   onMove);
       document.removeEventListener("touchend",    onUp);
       document.removeEventListener("touchcancel", onUp);
+      activeUpRef.current = null;
 
       if (!isDraggingRef.current) return; // was a click — onClick handles it
 
@@ -616,6 +627,7 @@ function SliderView({
       });
     };
 
+    activeUpRef.current = onUp;
     document.addEventListener("mousemove",   onMove);
     document.addEventListener("mouseup",     onUp);
     document.addEventListener("touchmove",   onMove, { passive: false });
