@@ -16,6 +16,7 @@ const t = {
         ui:           "UI",
         conceptArt:   "Concept Art",
         illustration: "Illustration",
+        animation:    "Animation",
         branding:     "Branding",
       },
     },
@@ -80,6 +81,12 @@ const t = {
         role:         "Illustrator",
       },
       "08": {
+        description:  "A short hand-drawn animation — illustrated frame by frame in Procreate on iPad, then composited and animated in After Effects.",
+        category:     "2D Animation",
+        type:         "Short Animation",
+        role:         "2D Animator",
+      },
+      "09": {
         description:  "Full brand identity for Lumi — a plant-based reimagining of the Japanese taiyaki. Logo design, packaging system, colour palette, typographic pairing, brand guidelines and brand book.",
         category:     "Branding · Packaging",
         type:         "Brand Identity",
@@ -103,6 +110,7 @@ const t = {
         ui:           "UI",
         conceptArt:   "Concept Art",
         illustration: "Illustration",
+        animation:    "Animation",
         branding:     "Branding",
       },
     },
@@ -167,6 +175,12 @@ const t = {
         role:         "Illustratrice",
       },
       "08": {
+        description:  "Une courte animation dessinée à la main — illustrée image par image dans Procreate sur iPad, puis compositée et animée dans After Effects.",
+        category:     "Animation 2D",
+        type:         "Court Métrage d'Animation",
+        role:         "Animatrice 2D",
+      },
+      "09": {
         description:  "Identité de marque complète pour Lumi — une réinvention végétale du taiyaki japonais. Design du logo, système de packaging, palette chromatique, accord typographique, charte graphique et brand book.",
         category:     "Branding · Packaging",
         type:         "Identité de Marque",

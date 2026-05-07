@@ -20,6 +20,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [isVisible, setIsVisible] = useState(true);
+  const [mounted,   setMounted]   = useState(false);
   const [key, setKey] = useState(0);
 
   const addTimer = (fn: () => void, ms: number) => {
@@ -87,12 +88,36 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   };
 
   useEffect(() => {
+    setMounted(true);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
+    const alreadySeen = sessionStorage.getItem("preloaderSeen") === "1";
+    if (reduced || alreadySeen) {
       setIsVisible(false);
       onComplete?.();
       return;
     }
+    sessionStorage.setItem("preloaderSeen", "1");
+
+    // ── Prefetch heavy assets during loading animation ──
+    // Browser caches these; when page requests them later = instant.
+    const PREFETCH = [
+      // 3D iPhone model (GLTF + binary)
+      "/asset3D/scene.gltf",
+      "/asset3D/scene.bin",
+      // Portfolio thumbnails (above-the-fold)
+      "/images/Portfolio/cuisine-royale/thumbnail_1920.webp",
+      "/images/Portfolio/Aporion/thumbnail_1920.webp",
+      "/images/title/titletitre_1920.webp",
+      "/images/Portfolio/ps_apocalypse/1_1920.webp",
+      "/images/Portfolio/Tower_defense_game/WORKSHOP_BATTLE_CHESS_1_1920.webp",
+      "/images/Book/couverture_1920.webp",
+      "/images/Portfolio/Other_works/Fallout_fanart/Zahara_Putri_AG4_Fallout_environnement_1920.webp",
+      "/images/Lumi/thumbnail.webp",
+    ];
+    PREFETCH.forEach(url => {
+      fetch(url, { priority: "low" } as RequestInit).catch(() => {});
+    });
+
     timersRef.current = [];
     const boot = setTimeout(runAnimation, 120);
     return () => {
@@ -109,7 +134,9 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
     setKey((k) => k + 1);
   };
 
-  if (!isVisible) {
+  // Before mount: return null on both SSR and first client render
+  // → no hydration mismatch, no flash on return visits
+  if (!mounted || !isVisible) {
     return null;
   }
 

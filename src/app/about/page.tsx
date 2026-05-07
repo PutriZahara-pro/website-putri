@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { NavContactButton } from "@/components/ui/nav-contact-button";
 
 /* ── Vertical grid (matches rest of site) ─────────────────── */
 function GridLines() {
@@ -138,12 +139,7 @@ export default function AboutPage() {
           </span>
         </div>
 
-        <button
-          aria-label="Contacter Putri Zahara"
-          className="text-[11px] font-mono tracking-[0.25em] text-white/50 hover:text-white focus-visible:text-white uppercase transition-colors bg-transparent border-none cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/40 focus-visible:outline-offset-4"
-        >
-          Contact
-        </button>
+        <NavContactButton className="text-[11px] font-mono tracking-[0.25em] text-white/50 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer" />
       </nav>
 
       {/* ════════════ DESKTOP LAYOUT ════════════ */}
@@ -254,7 +250,7 @@ export default function AboutPage() {
                 <span className="text-[7.5px] font-mono tracking-[0.32em] uppercase text-white/25 mr-1">
                   Tools
                 </span>
-                {["Photoshop", "Procreate", "Blender"].map((t) => (
+                {["Photoshop", "Illustrator", "Procreate", "Blender", "ZBrush", "After Effects"].map((t) => (
                   <span
                     key={t}
                     className="border border-white/[0.16] px-3 py-1 text-[8.5px] font-mono tracking-[0.22em] text-white/50 uppercase hover:text-white/80 hover:border-white/30 transition-colors"
@@ -267,6 +263,40 @@ export default function AboutPage() {
           </Win>
 
         </div>
+      </div>
+
+      {/* ════════════ RECOMMENDATION ROW (desktop) ════════════ */}
+      <div className="relative z-10 hidden md:block flex-shrink-0 px-4 lg:px-5 pb-4">
+        <Win title="linkedin_recommendation.txt">
+          <div className="px-6 py-4 flex gap-5 items-start">
+            {/* Avatar */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://media.licdn.com/dms/image/v2/D5603AQEcDy27iVdJwg/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1684233679091?e=1779926400&v=beta&t=SW3GjvGGzm7AxFYanbqfkau59emHQ3bs--g7VJtldu0"
+                alt="Jasper Ising"
+                className="w-9 h-9 object-cover"
+                style={{ border: "1px solid rgba(255,255,255,0.12)" }}
+                draggable={false}
+              />
+              <span className="text-[7px] font-mono tracking-[0.18em] text-white/25 uppercase text-center whitespace-nowrap">LinkedIn</span>
+            </div>
+            {/* Quote + author */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-mono text-white/55 leading-[1.8] mb-3">
+                <span className="text-white/25 text-[14px] font-bold mr-1">&ldquo;</span>
+                Putri consistently created stunning work that followed the company&apos;s style and branding guides perfectly. She has a remarkable ability to translate a vision onto paper rapidly. She was crucial to the 2D environment workflow, bringing ideas and references into final 2D renders that our 3D artists could seamlessly take over.
+                What sets Putri apart is her enthusiastic mindset; she requires no micromanagement and possesses a great intuition for knowing exactly when to ask for feedback and how to apply it to her designs.
+                <span className="text-white/25 text-[14px] font-bold ml-1">&rdquo;</span>
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="text-[8.5px] font-bold font-mono tracking-[0.18em] text-white/75 uppercase">Jasper Ising</span>
+                <span className="text-white/20 text-[8px]">·</span>
+                <span className="text-[8px] font-mono tracking-[0.12em] text-white/35">3D Environment Artist · Technical Artist — Olive Branch Interactive</span>
+              </div>
+            </div>
+          </div>
+        </Win>
       </div>
 
       {/* ════════════ MOBILE LAYOUT ════════════ */}
@@ -320,18 +350,38 @@ export default function AboutPage() {
           <div className="px-4 py-4">
             <p className="text-[11px] font-mono text-white/60 leading-[1.95] mb-3">
               International student in <strong className="font-bold text-white/90">Graphic Arts – Concept Art</strong>, passionate about creating worlds
-              for <strong className="font-bold text-white/90">video games and films</strong>. Main tools: <strong className="font-bold text-white/85">Photoshop, Procreate, Blender</strong>.
+              for <strong className="font-bold text-white/90">video games and films</strong>. Main tools: <strong className="font-bold text-white/85">Photoshop, Illustrator, Procreate, Blender, ZBrush, After Effects</strong>.
             </p>
             <p className="text-[11px] font-mono text-white/45 leading-[1.95] mb-4">
               I believe <strong className="font-bold text-white/75">teamwork</strong> brings the best ideas. My dream: contribute to projects that leave
               a <span className="text-white/70">lasting impression</span> and bring incredible stories to life.
             </p>
             <div className="pt-4 border-t border-white/[0.08] flex gap-2 flex-wrap">
-              {["Photoshop", "Procreate", "Blender"].map((t) => (
+              {["Photoshop", "Illustrator", "Procreate", "Blender", "ZBrush", "After Effects"].map((t) => (
                 <span key={t} className="border border-white/[0.16] px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/45 uppercase">
                   {t}
                 </span>
               ))}
+            </div>
+          </div>
+        </Win>
+
+        {/* Recommendation */}
+        <Win title="linkedin_recommendation.txt" className="flex-shrink-0">
+          <div className="px-4 py-4 flex gap-3 items-start">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://media.licdn.com/dms/image/v2/D5603AQEcDy27iVdJwg/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1684233679091?e=1779926400&v=beta&t=SW3GjvGGzm7AxFYanbqfkau59emHQ3bs--g7VJtldu0"
+              alt="Jasper Ising"
+              className="w-8 h-8 object-cover flex-shrink-0"
+              style={{ border: "1px solid rgba(255,255,255,0.12)" }}
+              draggable={false}
+            />
+            <div>
+              <p className="text-[10px] font-mono text-white/50 leading-[1.8] mb-2">
+                &ldquo;Putri consistently created stunning work, translating vision onto paper rapidly. Crucial to the 2D environment workflow. She requires no micromanagement and possesses great intuition for feedback.&rdquo;
+              </p>
+              <p className="text-[8px] font-bold font-mono tracking-[0.18em] text-white/65 uppercase">Jasper Ising <span className="font-normal text-white/30">· 3D Environment Artist · Olive Branch Interactive</span></p>
             </div>
           </div>
         </Win>

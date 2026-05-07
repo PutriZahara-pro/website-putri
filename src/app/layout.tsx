@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/contexts/LangContext";
+import { ContactProvider } from "@/contexts/ContactContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col"><LangProvider>{children}</LangProvider></body>
+      <head>
+        {/* Preload 3D model so it's cached before portfolio page opens */}
+        <link rel="preload" href="/asset3D/scene.gltf" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/asset3D/scene.bin"  as="fetch" crossOrigin="anonymous" />
+      </head>
+      <body className="min-h-full flex flex-col"><LangProvider><ContactProvider>{children}</ContactProvider></LangProvider></body>
     </html>
   );
 }

@@ -8,6 +8,7 @@ import { useGLTF, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import MobileGallery from "./MobileGallery";
 import { useLang } from "@/contexts/LangContext";
+import { NavContactButton } from "@/components/ui/nav-contact-button";
 import t from "@/lib/translations";
 import type { Lang } from "@/lib/translations";
 
@@ -26,6 +27,7 @@ type Project = {
   tags: string[];
   client?: string;
   deliverables?: string;
+  video?: string; // used as thumbnail hover preview + project video
 };
 
 const PROJECTS: Project[] = [
@@ -210,17 +212,55 @@ const PROJECTS: Project[] = [
     tags: ["Illustration", "Concept Art"],
     thumbnail: "/images/Portfolio/Other_works/Fallout_fanart/Zahara_Putri_AG4_Fallout_environnement_1920.webp",
     images: [
+      // Fallout fan art
       "/images/Portfolio/Other_works/Fallout_fanart/Zahara_Putri_AG4_Fallout_environnement_1920.webp",
+      // Concept Monsters
       "/images/Portfolio/Other_works/Concept_monstes/compilation_concepts_1920.webp",
+      "/images/Portfolio/Other_works/Concept_monstes/Iran_1920.webp",
+      "/images/Portfolio/Other_works/Concept_monstes/Ismi_1920.webp",
+      "/images/Portfolio/Other_works/Concept_monstes/Karkinos_1920.webp",
+      "/images/Portfolio/Other_works/Concept_monstes/Pili_1920.webp",
+      // Gnomes
       "/images/Portfolio/Other_works/Gnomes/gnome_recherche_1920.webp",
+      "/images/Portfolio/Other_works/Gnomes/gnome_3_volume_1920.webp",
       "/images/Portfolio/Other_works/Gnomes/volume_1_1920.webp",
+      "/images/Portfolio/Other_works/Gnomes/volume_2_1920.webp",
+      "/images/Portfolio/Other_works/Gnomes/volume_3_1920.webp",
+      // Marchand ambulant
+      "/images/Portfolio/Other_works/Marchant_ambulant/Recherche_personnage_1920.webp",
       "/images/Portfolio/Other_works/Marchant_ambulant/Recherche_chariot_1920.webp",
+      "/images/Portfolio/Other_works/Marchant_ambulant/Recherche_chariot_couleur_1920.webp",
+      // Chaudrons
+      "/images/Portfolio/Other_works/Chaudrons/Chaudron_araignée_1920.webp",
+      "/images/Portfolio/Other_works/Chaudrons/Chaudron_filtre_damour_1920.webp",
+      // Washing machine
+      "/images/Portfolio/Other_works/Washing_machine/Washing_machine_1920.webp",
+      // Building
       "/images/Portfolio/Other_works/building/1E1A1C08-ED86-407D-A752-0091CA984F94_1920.webp",
+      // Electric field
+      "/images/Portfolio/Other_works/eletric_field/6FA3148D-3C31-49D4-8000-7EEE421AB5E9_1920.webp",
     ],
   },
   {
     num: "08",
+    title: "Animation",
+    category: "2D Animation",
+    type: "Short Animation",
+    client: "Personal Project",
+    year: "2023",
+    tools: "Procreate · After Effects",
+    role: "2D Animator",
+    deliverables: "Vertical Animation",
+    description: "A short hand-drawn animation — illustrated frame by frame in Procreate on iPad, then composited and animated in After Effects.",
+    tags: ["Animation"],
+    thumbnail: "/images/Portfolio/Animation/Composition_1.webm",
+    video:     "/images/Portfolio/Animation/Composition_1.webm",
+    images:    [],
+  },
+  {
+    num: "09",
     title: "Lumi",
+
     category: "Branding · Packaging",
     type: "Brand Identity",
     year: "2024",
@@ -282,12 +322,13 @@ const INACTIVE_W = 120; /* px — collapsed card width              */
 const CARD_GAP   = 8;   /* px — gap-2 between cards               */
 const ACTIVE_VW  = 0.36; /* fraction of outerRef width for active  */
 
-const FILTERS = ["All", "Game", "UI", "Concept Art", "Illustration", "Branding"] as const;
+const FILTERS = ["All", "Game", "Concept Art", "UI", "Illustration", "Animation", "Branding"] as const;
 type FilterKey = typeof FILTERS[number];
 // Mapping English key → translation key
 const FILTER_LABEL_KEY: Record<FilterKey, keyof typeof t["en"]["slider"]["filters"]> = {
   "All": "all", "Game": "game", "UI": "ui",
-  "Concept Art": "conceptArt", "Illustration": "illustration", "Branding": "branding",
+  "Concept Art": "conceptArt", "Illustration": "illustration",
+  "Animation": "animation", "Branding": "branding",
 };
 
 function SliderView({
@@ -695,15 +736,41 @@ function SliderView({
                   transition: "width 0.32s cubic-bezier(0.16,1,0.3,1), height 0.32s cubic-bezier(0.16,1,0.3,1)",
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.thumbnail} alt={p.title} draggable={false}
-                  className="w-full h-full object-cover"
-                  style={{
-                    filter:     isActive ? "brightness(0.88)" : "grayscale(0.55) brightness(0.32)",
-                    transition: "filter 0.22s ease",
-                  }}
-                />
+                {p.video ? (
+                  <video
+                    src={p.video}
+                    muted playsInline loop preload="metadata"
+                    className="w-full h-full object-cover"
+                    style={{
+                      filter:     isActive ? "brightness(0.88)" : "grayscale(0.55) brightness(0.32)",
+                      transition: "filter 0.22s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      const v = e.currentTarget;
+                      v.currentTime = 0;
+                      v.play();
+                      // Pause after 2s
+                      const id = setTimeout(() => v.pause(), 2000);
+                      (v as HTMLVideoElement & { _hoverTO?: ReturnType<typeof setTimeout> })._hoverTO = id;
+                    }}
+                    onMouseLeave={(e) => {
+                      const v = e.currentTarget as HTMLVideoElement & { _hoverTO?: ReturnType<typeof setTimeout> };
+                      clearTimeout(v._hoverTO);
+                      v.pause();
+                      v.currentTime = 0;
+                    }}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={p.thumbnail} alt={p.title} draggable={false}
+                    className="w-full h-full object-cover"
+                    style={{
+                      filter:     isActive ? "brightness(0.88)" : "grayscale(0.55) brightness(0.32)",
+                      transition: "filter 0.22s ease",
+                    }}
+                  />
+                )}
 
                 {/* Expanded: gradient + title overlay */}
                 {isExpanded && (
@@ -931,38 +998,68 @@ const CUISINE_SCREENS_R3F = [
 const CUISINE_SCREENS = CUISINE_SCREENS_R3F; /* alias kept for other code */
 
 /* ── Per-screen descriptive text ── */
-const SCREEN_TEXTS = [
-  {
-    title: "Menu Principal",
-    desc:  "L'écran d'entrée présente l'univers culinaire royal du jeu. Le joueur découvre le gain maximum et peut lancer un tirage ou consulter les règles.",
-  },
-  {
-    title: "Révélation",
-    desc:  "Le plat gagnant est dévoilé avec une animation de cloche soulevée. Le montant du gain s'affiche en grand sur une bannière dorée, avec les options pour continuer ou revenir au menu.",
-  },
-  {
-    title: "Gameplay",
-    desc:  "Une grille 3×3 de plats couverts à gratter un par un. Les mises de 2 €, 4 € ou 6 € ajustent la cagnotte. Un compteur affiche les grattages restants, avec un bouton « Révéler » pour tout découvrir.",
-  },
-  {
-    title: "Règles du Jeu",
-    desc:  "Une fenêtre règles s'affiche sur un panneau en bois chaleureux. Le joueur peut lire le fonctionnement de la mécanique de grattage avant de miser.",
-  },
-  {
-    title: "Félicitations",
-    desc:  "L'écran gagnant explose de confettis et d'étoiles. Le gain est confirmé en grande typographie dorée, avec des appels à l'action clairs pour rejouer ou revenir au menu.",
-  },
-  {
-    title: "Partie Terminée",
-    desc:  "Sans gain, le joueur voit un écran sobre avec son résultat et une invitation à réessayer — le ton reste léger pour encourager une nouvelle partie.",
-  },
-];
+const SCREEN_TEXTS = {
+  en: [
+    {
+      title: "Main Menu",
+      desc:  "The entry screen introduces the game's royal culinary universe. The player discovers the maximum jackpot and can start a draw or consult the rules.",
+    },
+    {
+      title: "Reveal",
+      desc:  "The winning dish is unveiled with a lifted-cloche animation. The prize amount displays large on a golden banner, with clear options to continue or return to the menu.",
+    },
+    {
+      title: "Gameplay",
+      desc:  "A 3×3 grid of covered dishes to scratch one by one. Bets of €2, €4 or €6 adjust the jackpot. A counter tracks remaining scratches, with a Reveal All button to uncover everything at once.",
+    },
+    {
+      title: "Game Rules",
+      desc:  "A rules panel appears over a warm wood-textured background. The player can read the scratch mechanic before placing a bet.",
+    },
+    {
+      title: "Congratulations",
+      desc:  "The winning screen bursts with confetti and stars. The prize is confirmed in bold golden typography, with clear calls-to-action to play again or return to the menu.",
+    },
+    {
+      title: "Game Over",
+      desc:  "No win — a clean, minimal screen shows the result with a light invitation to try again. The tone stays encouraging to prompt another round.",
+    },
+  ],
+  fr: [
+    {
+      title: "Menu Principal",
+      desc:  "L'écran d'entrée présente l'univers culinaire royal du jeu. Le joueur découvre le gain maximum et peut lancer un tirage ou consulter les règles.",
+    },
+    {
+      title: "Révélation",
+      desc:  "Le plat gagnant est dévoilé avec une animation de cloche soulevée. Le montant du gain s'affiche en grand sur une bannière dorée, avec les options pour continuer ou revenir au menu.",
+    },
+    {
+      title: "Gameplay",
+      desc:  "Une grille 3×3 de plats couverts à gratter un par un. Les mises de 2 €, 4 € ou 6 € ajustent la cagnotte. Un compteur affiche les grattages restants, avec un bouton « Révéler » pour tout découvrir.",
+    },
+    {
+      title: "Règles du Jeu",
+      desc:  "Une fenêtre règles s'affiche sur un panneau en bois chaleureux. Le joueur peut lire le fonctionnement de la mécanique de grattage avant de miser.",
+    },
+    {
+      title: "Félicitations",
+      desc:  "L'écran gagnant explose de confettis et d'étoiles. Le gain est confirmé en grande typographie dorée, avec des appels à l'action clairs pour rejouer ou revenir au menu.",
+    },
+    {
+      title: "Partie Terminée",
+      desc:  "Sans gain, le joueur voit un écran sobre avec son résultat et une invitation à réessayer — le ton reste léger pour encourager une nouvelle partie.",
+    },
+  ],
+};
 
 function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: () => void }) {
   const { lang } = useLang();
   /* phase 0 = 3/4 view · 1 = face-on · 2 = image cycling */
   const [phase,     setPhase]     = useState(0);
   const [screenIdx, setScreenIdx] = useState(0);
+  // Defer Canvas mount until slide-in transition completes (avoids WebGL freeze)
+  const [canvasReady, setCanvasReady] = useState(false);
 
   /* displayIdx lags screenIdx by one animation cycle so text swaps mid-fade */
   const [displayIdx, setDisplayIdx] = useState(0);
@@ -991,6 +1088,13 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
+  }, []);
+
+  /* ── Defer Canvas until transition ends ── */
+  useEffect(() => {
+    // Slide-in is 0.85s — wait for it to finish before loading WebGL
+    const id = setTimeout(() => setCanvasReady(true), 900);
+    return () => clearTimeout(id);
   }, []);
 
   /* ── Entrance — use gsap.context() so StrictMode double-mount is safe ── */
@@ -1167,9 +1271,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
         </button>
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
-          <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-60 hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer">
-            {t[lang].nav.contact}
-          </button>
+          <NavContactButton />
         </div>
       </nav>
 
@@ -1207,21 +1309,47 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
             }}
           />
 
-          {/* Canvas */}
-          <Canvas
-            camera={{ position: [0, 0, 5.2], fov: 34 }}
-            style={{ width: "100%", maxWidth: isMobile ? "none" : "580px", height: isMobile ? "100%" : "min(900px, 78vh)" }}
-            gl={{ antialias: true, alpha: true, toneMappingExposure: 0.72 }}
-          >
-            <ambientLight intensity={0.22} />
-            <directionalLight position={[3, 6, 4]}  intensity={0.65} castShadow />
-            <directionalLight position={[-4, 2, 2]} intensity={0.14} color="#ffd580" />
-            <pointLight        position={[0, -3, 3]} intensity={0.15} />
-            <Environment preset="studio" />
-            <Suspense fallback={null}>
-              <IPhoneModel phase={phase} screenIdx={screenIdx} hoverTiltRef={hoverTiltRef} />
-            </Suspense>
-          </Canvas>
+          {/* Canvas — deferred until slide-in transition completes */}
+          <div style={{
+            width: "100%",
+            maxWidth: isMobile ? "none" : "580px",
+            height: isMobile ? "100%" : "min(900px, 78vh)",
+            position: "relative",
+          }}>
+            {/* Spinner placeholder while Canvas/WebGL initializes */}
+            {!canvasReady && (
+              <div style={{
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <div style={{
+                  width: 36, height: 36,
+                  border: "2px solid rgba(255,255,255,0.1)",
+                  borderTopColor: "rgba(255,255,255,0.6)",
+                  borderRadius: "50%",
+                  animation: "cuisine-spin 0.9s linear infinite",
+                }} />
+                <style>{`@keyframes cuisine-spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
+            {/* 3D Canvas — only mounts after transition (no freeze) */}
+            {canvasReady && (
+              <Canvas
+                camera={{ position: [0, 0, 5.2], fov: 34 }}
+                style={{ width: "100%", height: "100%" }}
+                gl={{ antialias: true, alpha: true, toneMappingExposure: 0.72 }}
+              >
+                <ambientLight intensity={0.22} />
+                <directionalLight position={[3, 6, 4]}  intensity={0.65} castShadow />
+                <directionalLight position={[-4, 2, 2]} intensity={0.14} color="#ffd580" />
+                <pointLight        position={[0, -3, 3]} intensity={0.15} />
+                <Environment preset="studio" />
+                <Suspense fallback={null}>
+                  <IPhoneModel phase={phase} screenIdx={screenIdx} hoverTiltRef={hoverTiltRef} />
+                </Suspense>
+              </Canvas>
+            )}
+          </div>
 
           {/* Scroll hint below the phone */}
           <div
@@ -1267,7 +1395,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
               className="font-black uppercase text-white leading-[0.88] tracking-[-0.02em] mb-5"
               style={{ fontSize: "clamp(26px, 2.8vw, 46px)" }}
             >
-              {SCREEN_TEXTS[displayIdx].title}
+              {SCREEN_TEXTS[lang][displayIdx].title}
             </h3>
 
             {/* Divider */}
@@ -1279,7 +1407,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
               className="text-white/45 font-mono leading-[1.85] tracking-[0.03em]"
               style={{ fontSize: "clamp(11px, 2.5vw, 13px)", maxWidth: "400px" }}
             >
-              {SCREEN_TEXTS[displayIdx].desc}
+              {SCREEN_TEXTS[lang][displayIdx].desc}
             </p>
 
             {/* Dot navigation */}
@@ -1347,6 +1475,197 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
               <polyline points="2,4 5,1 8,4" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1"/>
             </svg>
           </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   ANIMATION VIEW — Full-screen vertical video player
+───────────────────────────────────────────── */
+function AnimationView({ project, onClose }: { project: Project; onClose: () => void }) {
+  const { lang }   = useLang();
+  const navRef     = useRef<HTMLElement>(null);
+  const videoRef   = useRef<HTMLVideoElement>(null);
+  const closingRef = useRef(false);
+  const wheelRef   = useRef(0);
+  const mountTime  = useRef(Date.now());
+  const touchY     = useRef(0);
+  const [playing,  setPlaying]  = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
+  const [muted,    setMuted]    = useState(true);
+  const [volume,   setVolume]   = useState(0.8);
+  const lp = localizeProject(project, lang);
+
+  const toggleMute = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const next = !muted;
+    v.muted  = next;
+    v.volume = next ? 0 : volume;
+    setMuted(next);
+  }, [muted, volume]);
+
+  const handleVolume = useCallback((val: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    setVolume(val);
+    v.volume = val;
+    if (val > 0 && muted) { v.muted = false; setMuted(false); }
+    if (val === 0)         { v.muted = true;  setMuted(true);  }
+  }, [muted]);
+
+  const animateOut = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    gsap.fromTo(navRef.current, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.4 });
+    videoRef.current?.play().catch(() => {});
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else          { v.pause(); setPlaying(false); }
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    const now = Date.now();
+    if (now - mountTime.current < 600 || now - wheelRef.current < 350) return;
+    wheelRef.current = now;
+    if (e.deltaY < -30) animateOut();
+  }, [animateOut]);
+
+  return (
+    <main
+      className="h-screen w-screen overflow-hidden bg-black flex flex-col"
+      onWheel={handleWheel}
+      onTouchStart={(e) => { touchY.current = e.touches[0].clientY; }}
+      onTouchEnd={(e) => { if (e.changedTouches[0].clientY - touchY.current > 60) animateOut(); }}
+    >
+      <nav ref={navRef} className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-10 py-5">
+        <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
+          {t[lang].nav.home}
+        </Link>
+        <button onClick={animateOut} className="text-[11px] font-mono tracking-[0.25em] text-white/45 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer">
+          {t[lang].nav.projects}
+        </button>
+        <div className="flex items-center gap-3">
+          <LangToggle className="text-white" />
+          <NavContactButton />
+        </div>
+      </nav>
+
+      {/* VIDEO — centered vertical */}
+      <div className="flex-1 flex items-center justify-center relative" onClick={togglePlay}>
+        <video
+          ref={videoRef}
+          src={project.video}
+          muted loop playsInline
+          className="h-full w-auto max-w-full object-contain"
+          style={{ cursor: "pointer", maxHeight: "100vh" }}
+        />
+        {!playing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="white"><polygon points="6,3 17,10 6,17" /></svg>
+            </div>
+          </div>
+        )}
+
+        {/* ── Volume bar — right edge, vertical ── */}
+        <div
+          className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-20"
+          style={{ height: 180 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Vertical range slider */}
+          <div className="relative flex-1 flex items-center justify-center" style={{ width: 20 }}>
+            <input
+              type="range" min={0} max={1} step={0.01}
+              value={muted ? 0 : volume}
+              onChange={(e) => handleVolume(parseFloat(e.target.value))}
+              className="absolute"
+              style={{
+                writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
+                direction: "rtl" as React.CSSProperties["direction"],
+                width: 4, height: 130,
+                appearance: "slider-vertical" as React.CSSProperties["appearance"],
+                WebkitAppearance: "slider-vertical" as React.CSSProperties["WebkitAppearance"],
+                cursor: "pointer",
+                accentColor: muted ? "#ef4444" : "rgba(255,255,255,0.9)",
+                opacity: 0.85,
+              }}
+            />
+          </div>
+
+          {/* Speaker icon button */}
+          <button
+            onClick={toggleMute}
+            className="bg-transparent border-none cursor-pointer p-1 flex items-center justify-center"
+            aria-label="Toggle mute"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke={muted ? "#ef4444" : "white"}
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              {/* Speaker body */}
+              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" />
+              {muted ? (
+                /* Muted: diagonal bar */
+                <>
+                  <line x1="22" y1="2" x2="2" y2="22" stroke="#ef4444" strokeWidth="1.5" />
+                </>
+              ) : (
+                /* Unmuted: sound waves */
+                <>
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                  <path d="M19 5a9 9 0 0 1 0 14" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* BOTTOM overlay — title + info */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)", padding: "40px 40px 24px" }}
+      >
+        <div className="flex items-end justify-between pointer-events-auto">
+          <div>
+            <p className="text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase mb-1">{lp.num} · {lp.category}</p>
+            <h1 className="text-white font-black uppercase leading-[0.88] tracking-[-0.025em]" style={{ fontSize: "clamp(28px, 4vw, 56px)" }}>
+              {lp.title}
+            </h1>
+            <p className="text-white/50 text-[10px] font-mono tracking-[0.2em] mt-1">{lp.tools} · {lp.year}</p>
+          </div>
+          <button
+            onClick={() => setShowInfo(o => !o)}
+            className="text-[9px] font-mono tracking-[0.3em] uppercase text-white/50 hover:text-white bg-transparent border border-white/20 hover:border-white/60 px-4 py-2 cursor-pointer transition-colors"
+          >
+            {showInfo ? "×" : t[lang].project.info}
+          </button>
+        </div>
+        <div className="overflow-hidden transition-all duration-300" style={{ maxHeight: showInfo ? "220px" : "0px", opacity: showInfo ? 1 : 0 }}>
+          <div className="pt-4 grid gap-x-8 gap-y-2" style={{ gridTemplateColumns: "auto auto auto" }}>
+            {[
+              { label: t[lang].project.client, value: lp.client ?? lp.type },
+              { label: t[lang].project.role,   value: lp.role },
+              { label: t[lang].project.year,   value: lp.year },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <p className="text-white/40 text-[8px] font-mono tracking-[0.25em] uppercase mb-1">{label}</p>
+                <p className="text-white/90 text-[11px] font-mono">{value}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-white/60 text-[12px] leading-[1.65] mt-4 max-w-lg">{lp.description}</p>
         </div>
       </div>
     </main>
@@ -1777,9 +2096,7 @@ function ProjectView({
         </button>
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
-          <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-60 hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer">
-            {t[lang].nav.contact}
-          </button>
+          <NavContactButton />
         </div>
       </nav>
 
@@ -2356,7 +2673,8 @@ export default function Portfolio() {
             className="absolute inset-0"
           >
             {openProject.num === "01" ? <CuisineRoyaleView project={openProject} onClose={closeProject} />
-             : openProject.num === "08" ? <LumiView project={openProject} onClose={closeProject} />
+             : openProject.num === "08" ? <AnimationView   project={openProject} onClose={closeProject} />
+             : openProject.num === "09" ? <LumiView        project={openProject} onClose={closeProject} />
              : <ProjectView project={openProject} onClose={closeProject} />
             }
           </div>
