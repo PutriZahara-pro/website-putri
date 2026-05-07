@@ -4,11 +4,12 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, Suspense } f
 import Link from "next/link";
 import gsap from "gsap";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Environment } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import MobileGallery from "./MobileGallery";
 import { useLang } from "@/contexts/LangContext";
 import { NavContactButton } from "@/components/ui/nav-contact-button";
+import LangToggle from "@/components/ui/lang-toggle";
 import t from "@/lib/translations";
 import type { Lang } from "@/lib/translations";
 
@@ -172,13 +173,15 @@ const PROJECTS: Project[] = [
   {
     num: "06",
     title: "P.S. Apocalypse",
-    category: "Concept Art · Publishing",
-    type: "Graphic Novel",
-    year: "2023",
-    tools: "Photoshop",
-    role: "Illustrator · Art Director",
+    category: "Concept Art · Game",
+    type: "Game Concept Art",
+    client: "Personal Project",
+    year: "2022 – 2023",
+    tools: "Photoshop · Blender",
+    role: "Concept Artist",
+    deliverables: "Environment & Character Designs",
     description:
-      "Visual development for a graphic novel set in post-apocalyptic New York. Cover design, character concepts and environment mood boards.",
+      "Concept art for a survival game set in post-apocalyptic Brooklyn (Park Slope). Character Evelyn navigates her destroyed hometown — environment designs, character concepts and mood boards.",
     tags: ["Concept Art", "Illustration"],
     thumbnail: "/images/Portfolio/ps_apocalypse/1_1920.webp",
     images: [
@@ -190,13 +193,15 @@ const PROJECTS: Project[] = [
   {
     num: "07",
     title: "Tower Defense",
-    category: "Game · Prop Design",
-    type: "Game Art",
-    year: "2024",
+    category: "Game · Concept Art",
+    type: "Game Concept Art",
+    client: "Personal Project",
+    year: "2023 – 2024",
     tools: "Photoshop · Illustrator",
     role: "Concept Artist",
+    deliverables: "Environments & Seasonal Towers",
     description:
-      "Seasonal tower and prop design for a strategy tower-defense game. Four distinct seasonal themes with a cohesive visual language.",
+      "Concept art for a tower defense game — habitations and varied environments adapted to four distinct seasons, with a cohesive visual language across all assets.",
     tags: ["Game", "Concept Art"],
     thumbnail: "/images/Portfolio/Tower_defense_game/WORKSHOP_BATTLE_CHESS_1_1920.webp",
     images: [
@@ -212,11 +217,11 @@ const PROJECTS: Project[] = [
     title: "Sleeping Honey Beauty",
     category: "Illustration · Book",
     type: "Children's Book",
-    year: "2023",
-    tools: "Photoshop · Illustrator",
+    year: "2024",
+    tools: "Procreate · Photoshop",
     role: "Illustrator · Author",
     description:
-      "La Belle aux Miel Dormant — an illustrated children's book retelling Sleeping Beauty through the world of bees, honey and enchanted meadows.",
+      "In an enchanted kingdom, a curse plunges the realm into laziness after the birth of a princess. Years later, a prince and his companion quest for rare honey — leading them to a strange castle and unexpected magical revelations. Adventure Time-inspired visual style, created solo in one week. All illustrations, book design and printing handled independently.",
     tags: ["Illustration"],
     thumbnail: "/images/Book/couverture_1920.webp",
     images: [
@@ -284,20 +289,6 @@ function localizeProject(p: Project, lang: Lang): Project {
   return { ...p, ...loc };
 }
 
-/* ── FR/EN toggle button — fits both nav and standalone contexts ── */
-function LangToggle({ className }: { className?: string }) {
-  const { lang, toggle } = useLang();
-  return (
-    <button
-      onClick={toggle}
-      className={`bg-transparent border-none cursor-pointer font-mono uppercase tracking-[0.25em] transition-opacity hover:opacity-100 ${className ?? ""}`}
-      style={{ fontSize: "10px", letterSpacing: "0.25em", opacity: 0.6 }}
-      aria-label="Switch language"
-    >
-      {lang === "en" ? "FR" : "EN"}
-    </button>
-  );
-}
 
 /* ── Grid lines ── */
 function GridLines() {
@@ -653,7 +644,7 @@ function SliderView({
 
   return (
     <main
-      className="h-screen w-screen overflow-hidden bg-black flex flex-col"
+      className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col"
       onWheel={handleWheel}
     >
       <GridLines />
@@ -682,9 +673,10 @@ function SliderView({
         </div>
       </nav>
 
-      {/* FILTER PILLS — wrap on mobile, single line centered on desktop */}
+      {/* FILTER PILLS — single scrollable row on mobile, wrapped centered on desktop */}
       <div className="relative z-10 flex-shrink-0 px-4 sm:px-10 pb-3">
-        <div className="flex flex-wrap justify-center gap-[6px]">
+        <div className="flex sm:flex-wrap sm:justify-center gap-[6px] overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 no-scrollbar"
+          style={{ scrollbarWidth: "none" }}>
           {FILTERS.map((f) => {
             const isActive = activeFilter === f;
             return (
@@ -1263,7 +1255,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
 
   return (
     <main
-      className="h-screen w-screen overflow-hidden bg-black flex flex-col"
+      className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col"
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -1352,10 +1344,10 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
                 gl={{ antialias: true, alpha: true, toneMappingExposure: 0.72 }}
               >
                 <ambientLight intensity={0.22} />
+                <ambientLight intensity={0.35} />
                 <directionalLight position={[3, 6, 4]}  intensity={0.65} castShadow />
                 <directionalLight position={[-4, 2, 2]} intensity={0.14} color="#ffd580" />
                 <pointLight        position={[0, -3, 3]} intensity={0.15} />
-                <Environment preset="studio" />
                 <Suspense fallback={null}>
                   <IPhoneModel phase={phase} screenIdx={screenIdx} hoverTiltRef={hoverTiltRef} />
                 </Suspense>
@@ -1555,7 +1547,7 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
 
   return (
     <main
-      className="h-screen w-screen overflow-hidden bg-black flex flex-col"
+      className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col"
       onWheel={handleWheel}
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY; }}
       onTouchEnd={(e) => { if (e.changedTouches[0].clientY - touchY.current > 60) animateOut(); }}
@@ -1778,7 +1770,7 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
   }, [animateOut]);
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-black flex flex-col">
+    <main className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col">
       <nav ref={navRef} className="relative z-30 flex items-center justify-between px-10 py-5 flex-shrink-0 bg-black/80 backdrop-blur-md border-b border-white/5">
         <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
           ← Home
@@ -2086,7 +2078,7 @@ function ProjectView({
 
   return (
     <main
-      className="h-screen w-screen overflow-hidden bg-black flex flex-col"
+      className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col"
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -2656,7 +2648,7 @@ export default function Portfolio() {
       </div>
 
       {/* ── Two-layer scroll container ── */}
-      <div className="relative h-screen w-screen overflow-hidden bg-black">
+      <div className="relative h-[100dvh] w-screen max-w-full overflow-hidden bg-black">
 
         {/* Slider layer — always in DOM */}
         <div ref={sliderLayerRef} className="absolute inset-0">

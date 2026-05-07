@@ -64,8 +64,7 @@ export async function POST(req: NextRequest) {
   if (
     !trimmedName    || trimmedName.length    > MAX_NAME    ||
     !trimmedEmail   || trimmedEmail.length   > MAX_EMAIL   ||
-    !trimmedMessage || trimmedMessage.length > MAX_MESSAGE ||
-    !token
+    !trimmedMessage || trimmedMessage.length > MAX_MESSAGE
   ) {
     return NextResponse.json({ error: "invalid_length" }, { status: 400 });
   }
@@ -74,7 +73,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
 
-  // Turnstile verification
+  // Turnstile verification — required
+  if (!token) {
+    return NextResponse.json({ error: "captcha_required" }, { status: 400 });
+  }
   const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

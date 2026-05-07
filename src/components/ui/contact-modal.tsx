@@ -132,7 +132,7 @@ export function ContactModal({ onClose }: ContactModalProps) {
     const poll = () => {
       if (!mountedRef.current) return;
       if (tokenRef.current) { doSubmit(tokenRef.current); return; }
-      if (Date.now() > deadline) { setWaiting(false); setStep("error"); return; }
+      if (Date.now() > deadline) { doSubmit(tokenRef.current || ""); return; }
       pollTimerRef.current = window.setTimeout(poll, 150);
     };
     poll();
@@ -225,9 +225,6 @@ export function ContactModal({ onClose }: ContactModalProps) {
                 </span>
               </div>
 
-              {/* Turnstile — interaction-only: invisible unless challenge needed */}
-              <div ref={widgetRef} />
-
               <button
                 type="submit"
                 disabled={waiting}
@@ -266,9 +263,11 @@ export function ContactModal({ onClose }: ContactModalProps) {
                   setStep("form");
                   setWaiting(false);
                   tokenRef.current = "";
-                  if (window.turnstile && widgetIdRef.current) {
-                    window.turnstile.reset(widgetIdRef.current);
-                  }
+                  try {
+                    if (window.turnstile && widgetIdRef.current) {
+                      window.turnstile.reset(widgetIdRef.current);
+                    }
+                  } catch { /* widget may have been cleaned up */ }
                 }}
                 className="text-white/40 text-[9px] font-mono tracking-[0.2em] uppercase hover:text-white bg-transparent border-none cursor-pointer"
               >
@@ -277,6 +276,9 @@ export function ContactModal({ onClose }: ContactModalProps) {
             </div>
           )}
         </div>
+
+        {/* Turnstile — always in DOM so widget survives step changes */}
+        <div ref={widgetRef} style={{ padding: "0 32px 8px" }} />
       </div>
     </div>
   );
