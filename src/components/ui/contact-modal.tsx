@@ -51,10 +51,10 @@ export function ContactModal({ onClose }: ContactModalProps) {
     const tryRender = () => {
       if (window.turnstile && widgetRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(widgetRef.current, {
-          sitekey:    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-          theme:      "dark",
-          size:       "invisible",
-          callback:   "_cfTurnstileCallback",
+          sitekey:     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+          theme:       "dark",
+          appearance:  "interaction-only",
+          callback:    "_cfTurnstileCallback",
         });
       } else if (!window.turnstile) {
         setTimeout(tryRender, 300);
@@ -172,8 +172,8 @@ export function ContactModal({ onClose }: ContactModalProps) {
                 />
               </div>
 
-              {/* Invisible Turnstile widget */}
-              <div ref={widgetRef} style={{ display: "none" }} />
+              {/* Turnstile widget — appearance:interaction-only hides unless challenge needed */}
+              <div ref={widgetRef} />
 
               <button
                 type="submit"
