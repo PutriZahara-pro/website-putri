@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { LayoutPreloader } from "@/components/ui/layout-preloader";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
+import { NavContactButton } from "@/components/ui/nav-contact-button";
 import gsap from "gsap";
 
 
@@ -114,29 +115,11 @@ export default function Home() {
         />
 
         {/* ── NAV ── */}
-        <nav ref={navRef} aria-label="Navigation principale" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-6 py-5 md:px-10">
+        <nav ref={navRef} aria-label="Navigation principale" className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 sm:px-6 py-5 md:px-10">
           <span className="text-[12px] font-bold tracking-[0.25em] text-white uppercase">
             Putri Zahara
           </span>
-          <ul className="hidden sm:flex gap-10 text-[12px] font-bold tracking-[0.2em] text-white uppercase">
-            <li>
-              <button
-                onClick={goToPortfolio}
-                className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
-                Portfolio
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={goToAbout}
-                className="cursor-pointer opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 bg-transparent border-none text-white text-[12px] font-bold tracking-[0.2em] uppercase">
-                About
-              </button>
-            </li>
-          </ul>
-          <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase cursor-pointer opacity-80 hover:opacity-100 focus-visible:opacity-100 transition-opacity bg-transparent border-none">
-            Contact
-          </button>
+          <NavContactButton />
         </nav>
 
         {/* ── Radial fade behind centered content ── */}
