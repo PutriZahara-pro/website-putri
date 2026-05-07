@@ -81,6 +81,40 @@ const PROJECTS: Project[] = [
   },
   {
     num: "03",
+    title: "Lumi",
+    category: "Branding · Packaging",
+    type: "Brand Identity",
+    year: "2024",
+    tools: "Photoshop · Illustrator",
+    role: "Brand Designer · Art Director",
+    description:
+      "Brand identity for Lumi — a plant-based reimagining of traditional Japanese taiyaki. Logo, packaging system, color palette and full brand book.",
+    tags: ["Branding"],
+    thumbnail: "/images/Lumi/thumbnail.webp",
+    images: [
+      "/images/Lumi/Desktop-2.webp",
+      "/images/Lumi/thumbnail.webp",
+      "/images/Lumi/titre.webp",
+    ],
+  },
+  {
+    num: "04",
+    title: "Animation",
+    category: "2D Animation",
+    type: "Short Animation",
+    client: "Personal Project",
+    year: "2023",
+    tools: "Procreate · After Effects",
+    role: "2D Animator",
+    deliverables: "Vertical Animation",
+    description: "A short hand-drawn animation — illustrated frame by frame in Procreate on iPad, then composited and animated in After Effects.",
+    tags: ["Animation"],
+    thumbnail: "/images/Portfolio/Animation/Composition_1.webm",
+    video:     "/images/Portfolio/Animation/Composition_1.webm",
+    images:    [],
+  },
+  {
+    num: "05",
     title: "The Ethians Redeemed",
     category: "Game · Full Production",
     type: "Production Design",
@@ -136,7 +170,7 @@ const PROJECTS: Project[] = [
     ],
   },
   {
-    num: "04",
+    num: "06",
     title: "P.S. Apocalypse",
     category: "Concept Art · Publishing",
     type: "Graphic Novel",
@@ -154,7 +188,7 @@ const PROJECTS: Project[] = [
     ],
   },
   {
-    num: "05",
+    num: "07",
     title: "Tower Defense",
     category: "Game · Prop Design",
     type: "Game Art",
@@ -174,7 +208,7 @@ const PROJECTS: Project[] = [
     ],
   },
   {
-    num: "06",
+    num: "08",
     title: "Sleeping Honey Beauty",
     category: "Illustration · Book",
     type: "Children's Book",
@@ -200,7 +234,7 @@ const PROJECTS: Project[] = [
     ],
   },
   {
-    num: "07",
+    num: "09",
     title: "Other Works",
     category: "Illustration · Various",
     type: "Mixed",
@@ -239,41 +273,6 @@ const PROJECTS: Project[] = [
       "/images/Portfolio/Other_works/building/1E1A1C08-ED86-407D-A752-0091CA984F94_1920.webp",
       // Electric field
       "/images/Portfolio/Other_works/eletric_field/6FA3148D-3C31-49D4-8000-7EEE421AB5E9_1920.webp",
-    ],
-  },
-  {
-    num: "08",
-    title: "Animation",
-    category: "2D Animation",
-    type: "Short Animation",
-    client: "Personal Project",
-    year: "2023",
-    tools: "Procreate · After Effects",
-    role: "2D Animator",
-    deliverables: "Vertical Animation",
-    description: "A short hand-drawn animation — illustrated frame by frame in Procreate on iPad, then composited and animated in After Effects.",
-    tags: ["Animation"],
-    thumbnail: "/images/Portfolio/Animation/Composition_1.webm",
-    video:     "/images/Portfolio/Animation/Composition_1.webm",
-    images:    [],
-  },
-  {
-    num: "09",
-    title: "Lumi",
-
-    category: "Branding · Packaging",
-    type: "Brand Identity",
-    year: "2024",
-    tools: "Photoshop · Illustrator",
-    role: "Brand Designer · Art Director",
-    description:
-      "Brand identity for Lumi — a plant-based reimagining of traditional Japanese taiyaki. Logo, packaging system, color palette and full brand book.",
-    tags: ["Branding"],
-    thumbnail: "/images/Lumi/thumbnail.webp",
-    images: [
-      "/images/Lumi/Desktop-2.webp",
-      "/images/Lumi/thumbnail.webp",
-      "/images/Lumi/titre.webp",
     ],
   },
 ];
@@ -574,6 +573,9 @@ function SliderView({
 
       if (!isDraggingRef.current) return; // not yet dragging — wait
 
+      // Block browser scroll on horizontal drag (critical for iOS smoothness)
+      if ("touches" in ev) ev.preventDefault();
+
       gsap.set(innerRef.current, { x: d.startTrans + dx });
 
       // TAC: crossed STEP_PX → step 1 card + re-anchor
@@ -610,13 +612,13 @@ function SliderView({
       setIsDragging(false);
       setExpandedIdx(finalIdx);
       requestAnimationFrame(() => {
-        gsap.to(innerRef.current, { x: getX(finalIdx), duration: 0.35, ease: "expo.out" });
+        gsap.to(innerRef.current, { x: getX(finalIdx), duration: 0.42, ease: "back.out(1.4)" });
       });
     };
 
     document.addEventListener("mousemove",   onMove);
     document.addEventListener("mouseup",     onUp);
-    document.addEventListener("touchmove",   onMove, { passive: true });
+    document.addEventListener("touchmove",   onMove, { passive: false });
     document.addEventListener("touchend",    onUp);
     document.addEventListener("touchcancel", onUp);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -664,9 +666,7 @@ function SliderView({
         </div>
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
-          <button className="text-[11px] sm:text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-60 hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer">
-            {t[lang].nav.contact}
-          </button>
+          <NavContactButton />
         </div>
       </nav>
 
@@ -708,7 +708,7 @@ function SliderView({
         onTouchStart={handlePointerDown}
         onClickCapture={onCardClickCapture}
         style={{
-          touchAction: "pan-y",
+          touchAction: "none",
           cursor: "grab",
           maskImage:
             "linear-gradient(to right, transparent 0%, black 6%, black 82%, transparent 100%)",
@@ -1777,9 +1777,7 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
         >
           ← Projects
         </button>
-        <button className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-60 hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer">
-          Contact
-        </button>
+        <NavContactButton />
       </nav>
 
       <div
@@ -2639,9 +2637,9 @@ export default function Portfolio() {
     <>
       {/* ── Hidden image preloader — keeps all project images in browser cache ── */}
       <div aria-hidden style={{ display: "none" }}>
-        {PROJECTS.flatMap((p) => p.images).map((src, i) => (
+        {PROJECTS.flatMap((p) => p.images).map((src) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={i} src={src} alt="" />
+          <img key={src} src={src} alt="" />
         ))}
       </div>
 
@@ -2673,8 +2671,8 @@ export default function Portfolio() {
             className="absolute inset-0"
           >
             {openProject.num === "01" ? <CuisineRoyaleView project={openProject} onClose={closeProject} />
-             : openProject.num === "08" ? <AnimationView   project={openProject} onClose={closeProject} />
-             : openProject.num === "09" ? <LumiView        project={openProject} onClose={closeProject} />
+             : openProject.num === "04" ? <AnimationView   project={openProject} onClose={closeProject} />
+             : openProject.num === "03" ? <LumiView        project={openProject} onClose={closeProject} />
              : <ProjectView project={openProject} onClose={closeProject} />
             }
           </div>
