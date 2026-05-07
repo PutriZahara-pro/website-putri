@@ -40,10 +40,18 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
     if (targets.length) gsap.killTweensOf(targets);
   };
 
+  const finishOnce = useRef(false);
+  const finish = () => {
+    if (finishOnce.current) return;
+    finishOnce.current = true;
+    setIsVisible(false);
+    onComplete?.();
+  };
+
   const runAnimation = () => {
     if (!containerRef.current) return;
     const imgs = imageRefs.current.filter(Boolean) as HTMLDivElement[];
-    if (imgs.length < 3) return;
+    if (imgs.length < 3) { finish(); return; }
 
     const L = titleLeftRef.current!;
     const R = titleRightRef.current!;
@@ -79,10 +87,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
         yPercent: -100,
         duration: 0.60,
         ease: "power3.inOut",
-        onComplete: () => {
-          setIsVisible(false);
-          onComplete?.();
-        },
+        onComplete: finish,
       });
     }, 1550);
   };
@@ -92,8 +97,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const alreadySeen = sessionStorage.getItem("preloaderSeen") === "1";
     if (reduced || alreadySeen) {
-      setIsVisible(false);
-      onComplete?.();
+      finish();
       return;
     }
     sessionStorage.setItem("preloaderSeen", "1");
@@ -120,8 +124,11 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
 
     timersRef.current = [];
     const boot = setTimeout(runAnimation, 120);
+    // Hard failsafe: never block page longer than 4s on slow devices
+    const failsafe = setTimeout(finish, 4000);
     return () => {
       clearTimeout(boot);
+      clearTimeout(failsafe);
       killAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

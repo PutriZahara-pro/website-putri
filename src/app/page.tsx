@@ -83,12 +83,12 @@ export default function Home() {
 
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black">
+    <main className="relative h-[100dvh] w-screen max-w-full overflow-hidden bg-black">
       <LayoutPreloader onComplete={() => setPreloaderDone(true)} />
 
       <div
         ref={wrapRef}
-        className="relative h-screen w-screen overflow-hidden"
+        className="relative h-[100dvh] w-screen max-w-full overflow-hidden"
         style={{ opacity: preloaderDone ? 1 : 0, transition: "opacity 0.25s ease" }}
       >
         {/* Background image — decorative */}
