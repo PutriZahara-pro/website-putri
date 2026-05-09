@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
 
   // Turnstile verification — required
   if (!token) {
+    console.error("Turnstile: token missing or empty");
     return NextResponse.json({ error: "captcha_required" }, { status: 400 });
   }
   const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
