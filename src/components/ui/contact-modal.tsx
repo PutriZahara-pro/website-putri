@@ -12,8 +12,8 @@ declare global {
     turnstile?: {
       render: (el: HTMLElement, opts: Record<string, unknown>) => string;
       reset: (id: string) => void;
+      remove: (id: string) => void;
     };
-    _cfTurnstileCallback?: (token: string) => void;
   }
 }
 
@@ -63,11 +63,6 @@ export function ContactModal({ onClose }: ContactModalProps) {
 
   // Load Turnstile invisibly in the background while user fills form
   useEffect(() => {
-    window._cfTurnstileCallback = (tok: string) => {
-      tokenRef.current = tok;
-      if (mountedRef.current) setWaiting(false);
-    };
-
     const existing = document.getElementById("cf-turnstile-script");
     if (!existing) {
       const s = document.createElement("script");
@@ -84,7 +79,11 @@ export function ContactModal({ onClose }: ContactModalProps) {
           sitekey:    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
           theme:      "dark",
           appearance: "interaction-only",
-          callback:   "_cfTurnstileCallback",
+          callback:   (tok: string) => {
+            if (!mountedRef.current) return;
+            tokenRef.current = tok;
+            setWaiting(false);
+          },
         });
       } else if (!window.turnstile) {
         renderTimerRef.current = window.setTimeout(tryRender, 300);
@@ -93,9 +92,11 @@ export function ContactModal({ onClose }: ContactModalProps) {
     renderTimerRef.current = window.setTimeout(tryRender, 100);
 
     return () => {
-      delete window._cfTurnstileCallback;
       if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
       if (pollTimerRef.current)   window.clearTimeout(pollTimerRef.current);
+      if (window.turnstile && widgetIdRef.current) {
+        try { window.turnstile.remove(widgetIdRef.current); } catch { /* already removed */ }
+      }
     };
   }, []);
 
