@@ -20,7 +20,6 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [isVisible, setIsVisible] = useState(true);
-  const [mounted,   setMounted]   = useState(false);
   const [key, setKey] = useState(0);
 
   const addTimer = (fn: () => void, ms: number) => {
@@ -44,17 +43,19 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   const finish = () => {
     if (finishOnce.current) return;
     finishOnce.current = true;
+    try { sessionStorage.setItem("preloaderSeen", "1"); } catch {}
     setIsVisible(false);
     onComplete?.();
   };
 
   const runAnimation = () => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) { finish(); return; }
     const imgs = imageRefs.current.filter(Boolean) as HTMLDivElement[];
     if (imgs.length < 3) { finish(); return; }
 
-    const L = titleLeftRef.current!;
-    const R = titleRightRef.current!;
+    const L = titleLeftRef.current;
+    const R = titleRightRef.current;
+    if (!L || !R) { finish(); return; }
 
     // — Set hidden initial states via CSS transforms directly —
     gsap.set([L, R], { opacity: 0, x: 0 });
@@ -93,22 +94,17 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
   };
 
   useEffect(() => {
-    setMounted(true);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const alreadySeen = sessionStorage.getItem("preloaderSeen") === "1";
     if (reduced || alreadySeen) {
       finish();
       return;
     }
-    sessionStorage.setItem("preloaderSeen", "1");
 
     // ── Prefetch heavy assets during loading animation ──
-    // Browser caches these; when page requests them later = instant.
     const PREFETCH = [
-      // 3D iPhone model (GLTF + binary)
       "/asset3D/scene.gltf",
       "/asset3D/scene.bin",
-      // Portfolio thumbnails (above-the-fold)
       "/images/Portfolio/cuisine-royale/thumbnail_1920.webp",
       "/images/Portfolio/Aporion/thumbnail_1920.webp",
       "/images/title/titletitre_1920.webp",
@@ -123,12 +119,30 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
     });
 
     timersRef.current = [];
-    const boot = setTimeout(runAnimation, 120);
-    // Hard failsafe: never block page longer than 4s on slow devices
-    const failsafe = setTimeout(finish, 4000);
+
+    // Wait for hero images to actually load before animating — prevents
+    // animating empty divs on slow networks (= "page blanche").
+    let started = false;
+    const startOnce = () => {
+      if (started) return;
+      started = true;
+      runAnimation();
+    };
+
+    const loaders = IMAGES.map(src => new Promise<void>(resolve => {
+      const img = new window.Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = src;
+    }));
+    Promise.all(loaders).then(() => addTimer(startOnce, 80));
+
+    // Soft fallback: if images take too long, start anyway at 1.2s
+    addTimer(startOnce, 1200);
+    // Hard failsafe: never block page longer than 4.5s
+    addTimer(finish, 4500);
+
     return () => {
-      clearTimeout(boot);
-      clearTimeout(failsafe);
       killAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,11 +155,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
     setKey((k) => k + 1);
   };
 
-  // Before mount: return null on both SSR and first client render
-  // → no hydration mismatch, no flash on return visits
-  if (!mounted || !isVisible) {
-    return null;
-  }
+  if (!isVisible) return null;
 
   return (
     <div
