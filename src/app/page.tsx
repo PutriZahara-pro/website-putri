@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { LayoutPreloader } from "@/components/ui/layout-preloader";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import { NavContactButton } from "@/components/ui/nav-contact-button";
@@ -92,12 +93,14 @@ export default function Home() {
         style={{ opacity: preloaderDone ? 1 : 0, transition: "opacity 0.25s ease" }}
       >
         {/* Background image — decorative */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/images/landingpage/Harbor_thumbnail_final_obi_1920.webp"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          sizes="100vw"
+          preload
+          className="object-cover"
           style={{ filter: "brightness(0.75) contrast(1.05)" }}
           draggable={false}
         />
@@ -131,6 +134,11 @@ export default function Home() {
               "radial-gradient(ellipse 55% 48% at 50% 50%, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0) 85%)",
           }}
         />
+
+        {/* ── COPYRIGHT ── */}
+        <p className="pointer-events-none absolute bottom-4 left-0 right-0 z-30 text-center text-[9px] font-mono tracking-[0.25em] uppercase text-white/35">
+          © {new Date().getFullYear()} Putri Zahara — All rights reserved
+        </p>
 
         {/* ── MAIN CONTENT ── */}
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 sm:px-6 md:px-10">
