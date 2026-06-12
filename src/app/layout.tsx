@@ -23,8 +23,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.putrizahara.com"),
   title: "Putri Zahara — Concept Artist & UI/UX Designer",
   description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer. Disponible pour des projets freelance et des opportunités full-time.",
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "Putri Zahara",
+    title: "Putri Zahara — Concept Artist & UI/UX Designer",
+    description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer. Disponible pour des projets freelance et des opportunités full-time.",
+    images: [
+      {
+        url: "/images/landingpage/Harbor_thumbnail_final_obi_1920.webp",
+        width: 1920,
+        height: 1080,
+        alt: "Concept art — Putri Zahara",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Putri Zahara — Concept Artist & UI/UX Designer",
+    description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer.",
+    images: ["/images/landingpage/Harbor_thumbnail_final_obi_1920.webp"],
+  },
 };
 
 export default function RootLayout({
@@ -38,11 +60,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        {/* Preload 3D model so it's cached before portfolio page opens */}
-        <link rel="preload" href="/asset3D/scene.gltf" as="fetch" crossOrigin="anonymous" />
-        <link rel="preload" href="/asset3D/scene.bin"  as="fetch" crossOrigin="anonymous" />
-      </head>
       <body className="min-h-full flex flex-col"><LangProvider><ContactProvider>{children}</ContactProvider></LangProvider></body>
     </html>
   );
