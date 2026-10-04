@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useLang } from "@/contexts/LangContext";
 import { useContact } from "@/contexts/ContactContext";
@@ -19,7 +19,7 @@ const copy = {
   en: {
     aria: "About Putri Zahara",
     nav: { label: "Main navigation", home: "Home", portfolio: "Portfolio", about: "About", contact: "Contact", lang: "Passer le site en français" },
-    osd: "CCTV 01 · About",
+    page: "About me",
     loader: {
       role: "Concept Artist & Illustrator",
       rows: [["File.", "PZ_PROFILE_01"], ["Loc.", "Lyon — FR"]],
@@ -66,7 +66,7 @@ const copy = {
   fr: {
     aria: "À propos de Putri Zahara",
     nav: { label: "Navigation principale", home: "Accueil", portfolio: "Portfolio", about: "À propos", contact: "Contact", lang: "Switch the site to English" },
-    osd: "CCTV 01 · À propos",
+    page: "À propos",
     loader: {
       role: "Concept Artist & Illustratrice",
       rows: [["Fich.", "PZ_PROFIL_01"], ["Lieu.", "Lyon — FR"]],
@@ -114,27 +114,11 @@ const copy = {
 
 const MATCHES = [
   { name: "Aporion", src: "/images/Portfolio/Aporion/Harbor_thumbnail_final_obi_640.webp" },
-  { name: "The Ethians Redeemed", src: "/images/Portfolio/The_Ethians_Redeemed/Concept_chateau_de_vulkan_640.webp" },
-  { name: "Fallout — fan art", src: "/images/Portfolio/Other_works/Fallout_fanart/Zahara_Putri_AG4_Fallout_environnement_640.webp" },
+  { name: "The Ethians Redeemed", src: "/images/Portfolio/The_Ethians_Redeemed/Concept_ville_yirie_640.webp" },
+  { name: "P.S. Apocalypse", src: "/images/Portfolio/ps_apocalypse/2_640.webp" },
 ];
 
 /* ── Small drawings ────────────────────────────────────────── */
-// Jagged sticker outline, Lucy-Rae style
-const ZIGZAG = (() => {
-  const nx = 14, ny = 4, d = 3, p: string[] = [];
-  for (let i = 0; i <= nx; i++) p.push(`${(i / nx) * 100}% ${i % 2 ? d : 0}px`);
-  for (let j = 1; j <= ny; j++) p.push(`calc(100% - ${j % 2 ? d : 0}px) ${(j / ny) * 100}%`);
-  for (let i = nx - 1; i >= 0; i--) p.push(`${(i / nx) * 100}% calc(100% - ${i % 2 ? d : 0}px)`);
-  for (let j = ny - 1; j >= 1; j--) p.push(`${j % 2 ? d : 0}px ${(j / ny) * 100}%`);
-  return `polygon(${p.join(",")})`;
-})();
-
-const STICKER = { pink: "#ff9fd6", cyan: "#62c9f2", purple: "#7b34d1", yellow: "#ffe14d", green: "#4fd47a" };
-
-function Sticker({ color, children }: { color: string; children: ReactNode }) {
-  return <span style={{ background: color, clipPath: ZIGZAG }}>{children}</span>;
-}
-
 function PixelFolder() {
   return (
     <svg viewBox="0 0 16 13" shapeRendering="crispEdges" aria-hidden="true">
@@ -188,7 +172,15 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
   const countRef = useRef<HTMLSpanElement>(null);
   const skipRef = useRef<() => void>(() => {});
 
-  // Live clock (date line, CCTV timecode, signature)
+  // Match results: one selected card (red frame + colour), first by default, follows the pointer
+  const [sel, setSel] = useState(0);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const selFrameRef = useRef<HTMLSpanElement>(null);
+  const matchImgRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const prevSel = useRef(0);
+  const selAnim = useRef<Animation | null>(null);
+
+  // Live clock (intro timecode, signature)
   useEffect(() => {
     const tick = () => setNow(new Date());
     const first = setTimeout(tick, 0);
@@ -249,17 +241,18 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
       const iy = Math.max(0, (r.height - v.height / s) / 2);
 
       Object.assign(box.style, { inset: "auto", left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
-      const ease = "cubic-bezier(0.77, 0, 0.18, 1)";
+      // Whip in, overshoot slightly smaller, snap back: the slam the impact (CSS) answers
       running = [
         box.animate(
           [
-            { transform: `translate(${dx}px, ${dy}px) scale(${s})`, clipPath: `inset(${iy}px ${ix}px)` },
+            { transform: `translate(${dx}px, ${dy}px) scale(${s})`, clipPath: `inset(${iy}px ${ix}px)`, easing: "cubic-bezier(0.9, 0, 0.1, 1)" },
+            { transform: "translate(0px, 0px) scale(0.94)", clipPath: "inset(0px 0px)", offset: 0.8, easing: "cubic-bezier(0.3, 1.8, 0.5, 1)" },
             { transform: "translate(0px, 0px) scale(1)", clipPath: "inset(0px 0px)" },
           ],
-          { duration: 1100, easing: ease, fill: "both" },
+          { duration: 620, fill: "both" },
         ),
-        ...(blurRef.current ? [blurRef.current.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 950, delay: 150, easing: "ease-out", fill: "both" })] : []),
-        ...(shadeRef.current ? [shadeRef.current.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, easing: "ease-out", fill: "both" })] : []),
+        ...(blurRef.current ? [blurRef.current.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, delay: 60, easing: "ease-out", fill: "both" })] : []),
+        ...(shadeRef.current ? [shadeRef.current.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-out", fill: "both" })] : []),
       ];
       setPhase("shrink");
 
@@ -292,9 +285,39 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
     return () => io.disconnect();
   }, []);
 
-  const locale = lang === "fr" ? "fr-FR" : "en-US";
-  const dateLine = now ? now.toLocaleDateString(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : " ";
-  const timeLine = now ? now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: lang === "en" }) : " ";
+  // Red frame on the selected match image; on change it locks on like the hero's face box
+  useEffect(() => {
+    const grid = gridRef.current, frame = selFrameRef.current, img = matchImgRefs.current[sel];
+    if (!grid || !frame || !img) return;
+    const place = () => {
+      const g = grid.getBoundingClientRect(), r = img.getBoundingClientRect();
+      if (!r.width) return false; // card hidden (3rd one on phones)
+      Object.assign(frame.style, {
+        left: `${r.left - g.left}px`, top: `${r.top - g.top}px`,
+        width: `${r.width}px`, height: `${r.height}px`, opacity: "1",
+      });
+      return true;
+    };
+    if (place() && prevSel.current !== sel) {
+      selAnim.current?.cancel();
+      selAnim.current = frame.animate(
+        [
+          { transform: "scale(1.22)", opacity: 0 },
+          { transform: "scale(0.97)", opacity: 1, offset: 0.45 },
+          { opacity: 0.2, offset: 0.6 },
+          { opacity: 1, offset: 0.72 },
+          { opacity: 0.4, offset: 0.84 },
+          { transform: "scale(1)", opacity: 1 },
+        ],
+        { duration: 480, easing: "cubic-bezier(0.3, 0.8, 0.3, 1)" },
+      );
+    }
+    prevSel.current = sel;
+    const ro = new ResizeObserver(place);
+    ro.observe(grid);
+    return () => ro.disconnect();
+  }, [sel]);
+
   const timecode = now ? `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}` : "--:--:--";
   const hhmm = now ? `${pad2(now.getHours())}:${pad2(now.getMinutes())}` : "--:--";
   const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
@@ -320,18 +343,18 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
           </div>
 
           <div className="ab-loader">
-            <p className="ld" style={d(80)}>Putri Zahara</p>
-            <p className="ld" style={d(160)}>{c.loader.role}</p>
+            <p className="ld" style={d(40)}>Putri Zahara</p>
+            <p className="ld" style={d(80)}>{c.loader.role}</p>
             <div className="gap" />
             {c.loader.rows.map(([k, v], i) => (
-              <p key={k} className="ld row" style={d(380 + i * 110)}><span>{k}</span><span>{v}</span></p>
+              <p key={k} className="ld row" style={d(200 + i * 60)}><span>{k}</span><span>{v}</span></p>
             ))}
-            <p className="ld row" style={d(600)}><span>{c.loader.load}</span><span ref={countRef} className="ab-count" /></p>
-            <div className="ld ab-bar" style={d(600)} />
+            <p className="ld row" style={d(320)}><span>{c.loader.load}</span><span ref={countRef} className="ab-count" /></p>
+            <div className="ld ab-bar" style={d(320)} />
             <div className="gap" />
-            <p className="ld row end" style={d(900)}><span>{c.loader.scan}</span><span>03</span></p>
-            <p className="ld" style={d(1050)}>{c.loader.detect}<span className="ab-dots" /></p>
-            <p className="ld row end" style={d(2050)}><span>{c.loader.match}</span><span>PZ-0047 ✓</span></p>
+            <p className="ld row end" style={d(480)}><span>{c.loader.scan}</span><span>03</span></p>
+            <p className="ld" style={d(560)}>{c.loader.detect}<span className="ab-dots" /></p>
+            <p className="ld row end" style={d(950)}><span>{c.loader.match}</span><span>PZ-0047 ✓</span></p>
           </div>
 
           <p className="ab-intro-skip">{c.loader.skip}</p>
@@ -340,16 +363,9 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
 
       {/* ════════════ HERO ════════════ */}
       <section className="ab-hero">
-        <div className="ab-frame rv" style={d(0)} aria-hidden="true" />
 
         {/* Pen scribbles (Padilla) */}
         <svg className="ab-scribble" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path className="ab-stroke rv rv-draw" style={{ ...d(1200), "--rv-dur": "2.2s" } as CSSProperties} pathLength={1} vectorEffect="non-scaling-stroke"
-            stroke="#3fae78" strokeWidth="1.1" opacity="0.7"
-            d="M33 9 C 34 13, 31 15, 33 18 S 37 22, 35 26 M35 26 C 33 28, 36 30, 34 33" />
-          <path className="ab-stroke rv rv-draw" style={{ ...d(1500), "--rv-dur": "2s" } as CSSProperties} pathLength={1} vectorEffect="non-scaling-stroke"
-            stroke="#3fae78" strokeWidth="1" opacity="0.45"
-            d="M66 12 C 68 16, 64 19, 67 23 S 70 28, 68 32 C 66 35, 71 37, 69 41" />
           <path className="ab-stroke rv rv-draw" style={{ ...d(1700), "--rv-dur": "1.6s" } as CSSProperties} pathLength={1} vectorEffect="non-scaling-stroke"
             stroke="#6f8fe8" strokeWidth="1" opacity="0.45"
             d="M14 70 C 16 72, 13 74, 16 77 C 18 79, 15 82, 18 84" />
@@ -357,24 +373,26 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
 
         {/* Top bar */}
         <header className="ab-top">
-          <div className="rv rv-down" style={d(60)}>
-            <Link href="/" className="ab-logo" aria-label={c.nav.home}>
-              Putri Zahara
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L1.4 7.8l6-.7z" fill="#ffe14d" stroke="#141414" strokeWidth="1.3" strokeLinejoin="round" /></svg>
-            </Link>
-            <p className="ab-date" suppressHydrationWarning>{dateLine}<br />{timeLine}</p>
-          </div>
+          <Link href="/" className="ab-logo rv rv-down" style={d(60)} aria-label={c.nav.home}>
+            Putri Zahara
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L1.4 7.8l6-.7z" fill="#ffe14d" stroke="#141414" strokeWidth="1.3" strokeLinejoin="round" /></svg>
+          </Link>
 
-          <p className="ab-osd rv rv-down" style={d(140)} aria-hidden="true">
-            <span className="ab-rec" />{c.osd}<br /><span suppressHydrationWarning>{timecode}</span>
+          {/* Page name, handwritten and circled in pen */}
+          <p className="ab-page" aria-hidden="true">
+            <span className="ab-hand rv rv-write" style={{ ...d(140), "--rv-dur": "0.9s" } as CSSProperties}>{c.page}</span>
+            <svg viewBox="0 0 108 38" preserveAspectRatio="none">
+              <path className="ab-stroke rv rv-draw" style={d(700)} pathLength={1} vectorEffect="non-scaling-stroke" stroke="#1d2bd9" strokeWidth="1.5"
+                d="M10 24 C 2 12, 28 3, 58 3 C 90 3, 106 12, 102 22 C 98 33, 62 37, 36 35 C 14 33, 4 27, 14 13" />
+            </svg>
           </p>
 
           <nav className="ab-nav" aria-label={c.nav.label}>
-            <Link href="/" className="ab-sticker rv rv-drop" style={d(160)}><Sticker color={STICKER.pink}>{c.nav.home}</Sticker></Link>
-            <Link href="/portfolio" className="ab-sticker rv rv-drop" style={d(230)}><Sticker color={STICKER.cyan}>{c.nav.portfolio}</Sticker></Link>
-            <Link href="/about" aria-current="page" className="ab-sticker rv rv-drop" style={d(300)}><Sticker color={STICKER.purple}>{c.nav.about}</Sticker></Link>
-            <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="ab-sticker rv rv-drop" style={d(370)}><Sticker color={STICKER.yellow}>LinkedIn</Sticker></a>
-            <button type="button" onClick={openContact} className="ab-sticker rv rv-drop" style={d(440)}><Sticker color={STICKER.green}>{c.nav.contact}</Sticker></button>
+            <Link href="/" className="ab-btn rv rv-down" style={d(160)}>{c.nav.home}</Link>
+            <Link href="/portfolio" className="ab-btn rv rv-down" style={d(230)}>{c.nav.portfolio}</Link>
+            <Link href="/about" aria-current="page" className="ab-btn rv rv-down" style={d(300)}>{c.nav.about}</Link>
+            <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="ab-btn rv rv-down" style={d(370)}>LinkedIn</a>
+            <button type="button" onClick={openContact} className="ab-btn rv rv-down" style={d(440)}>{c.nav.contact}</button>
             <button type="button" onClick={toggle} className="ab-lang rv rv-down" style={d(500)} aria-label={c.nav.lang}>{lang === "en" ? "FR" : "EN"}</button>
           </nav>
         </header>
@@ -402,8 +420,8 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
           <div className="ab-box ab-box-blue rv rv-lock" style={d(480)} aria-hidden="true">
             <span className="ab-tag rv rv-wipe" style={d(820)}>{c.hero.subject}</span>
           </div>
-          <span className="ab-eye rv rv-pop" style={{ ...d(950), left: "46%", top: "40.2%" }} aria-hidden="true"><Cross color="#3ad15a" /></span>
-          <span className="ab-eye rv rv-pop" style={{ ...d(1030), left: "57.9%", top: "44%" }} aria-hidden="true"><Cross color="#f5d00f" /></span>
+          <span className="ab-eye rv rv-pop" style={{ ...d(950), left: "46%", top: "40.2%" }} aria-hidden="true"><Cross color="#fff" /></span>
+          <span className="ab-eye rv rv-pop" style={{ ...d(1030), left: "57.9%", top: "44%" }} aria-hidden="true"><Cross color="#fff" /></span>
           <svg className="ab-link-line" aria-hidden="true">
             <line className="ab-stroke rv rv-draw only-d" style={{ ...d(1000), "--rv-dur": "0.6s" } as CSSProperties} pathLength={1} x1="69%" y1="25%" x2="137%" y2="58%" stroke="#1d2bd9" strokeWidth="1.6" />
             <line className="ab-stroke rv rv-draw only-m" style={{ ...d(1000), "--rv-dur": "0.6s" } as CSSProperties} pathLength={1} x1="69%" y1="25%" x2="108%" y2="66%" stroke="#1d2bd9" strokeWidth="1.6" />
@@ -540,18 +558,19 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
 
             <div className="ab-group ab-matches" data-io style={d(150)}>
               <h3 className="ab-legend">{c.file.matches}</h3>
-              <div className="ab-match-grid">
+              <div ref={gridRef} className="ab-match-grid">
                 {MATCHES.map((m, i) => (
-                  <Link key={m.name} href="/portfolio" className="ab-match">
+                  <Link key={m.name} href="/portfolio" className={`ab-match${sel === i ? " is-sel" : ""}`}
+                    onMouseEnter={() => setSel(i)} onFocus={() => setSel(i)}>
                     <span className="ab-match-id"><span>{i + 1} · ID</span><span className="ab-sunken">{`0000000${i + 1}`}</span></span>
-                    <span className="ab-match-img">
+                    <span ref={(el) => { matchImgRefs.current[i] = el; }} className="ab-match-img">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={m.src} alt="" loading="lazy" draggable={false} />
-                      <span className="ab-scanbar" style={d(300 + i * 250)} />
                     </span>
                     <span className="ab-match-name">{m.name}</span>
                   </Link>
                 ))}
+                <span ref={selFrameRef} className="ab-match-sel" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -582,9 +601,9 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
       <footer className="ab-outro" data-io>
         <p className="ab-hand">{c.outro.title} →</p>
         <div className="ab-outro-ctas">
-          <button type="button" onClick={openContact} className="ab-sticker"><Sticker color={STICKER.green}>{c.nav.contact}</Sticker></button>
-          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="ab-sticker"><Sticker color={STICKER.yellow}>LinkedIn</Sticker></a>
-          <Link href="/portfolio" className="ab-sticker"><Sticker color={STICKER.cyan}>{c.nav.portfolio}</Sticker></Link>
+          <button type="button" onClick={openContact} className="ab-btn">{c.nav.contact}</button>
+          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="ab-btn">LinkedIn</a>
+          <Link href="/portfolio" className="ab-btn">{c.nav.portfolio}</Link>
         </div>
         <div className="ab-foot">
           <span>© {new Date().getFullYear()} Putri Zahara — {c.outro.rights}</span>

@@ -5,6 +5,7 @@ const t = {
     nav: {
       home:     "← Home",
       projects: "← Projects",
+      about:    "About me",
       contact:  "Contact",
       backHint: "Scroll ↑ or Esc",
     },
@@ -105,6 +106,7 @@ const t = {
     nav: {
       home:     "← Accueil",
       projects: "← Projets",
+      about:    "À propos",
       contact:  "Contact",
       backHint: "Défiler ↑ ou Échap",
     },
