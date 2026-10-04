@@ -2012,7 +2012,7 @@ function ProjectView({
   const [activeImage, setActiveImage] = useState(0);
   const [drawerOpen, setDrawerOpen]   = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(272);
-  const [mobileDescOpen, setMobileDescOpen] = useState(false);
+  const [mobileDescOpen, setMobileDescOpen] = useState(true); // phone: info shown under the image, like desktop
   const { lang } = useLang();
   const lp = localizeProject(project, lang); // continuous: 272 (1 col) → 544 (2 cols)
   const wheelRef      = useRef(0);
@@ -2137,7 +2137,7 @@ function ProjectView({
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchOnMain  = useRef(false); // true only if touchstart fired on <main>
-  const pullRef      = useRef({ y: 0, scrollTop: 0, image: 0 }); // phone pull-to-close
+  const pullRef      = useRef({ x: 0, y: 0, scrollTop: 0 }); // phone pull-to-close
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (isDragging.current) return;
     // The phone layout handles its own gestures (vertical gallery + pull-down
@@ -2201,14 +2201,15 @@ function ProjectView({
         className="sm:hidden flex flex-col flex-1 overflow-y-auto overscroll-y-contain"
         style={{ scrollbarWidth: "none" }}
         onTouchStart={(e) => {
-          pullRef.current = { y: e.touches[0].clientY, scrollTop: e.currentTarget.scrollTop, image: activeImage };
+          pullRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, scrollTop: e.currentTarget.scrollTop };
         }}
         onTouchEnd={(e) => {
-          // Pull down = back to projects, but only from the very top on the
-          // first image; on later images the gallery goes to the previous one.
-          const { y, scrollTop, image } = pullRef.current;
+          // Pull down from the top of the page = back to projects. The gallery
+          // swipes sideways, so a mostly-vertical pull is never an image swipe.
+          const { x, y, scrollTop } = pullRef.current;
           const dy = e.changedTouches[0].clientY - y;
-          if (scrollTop <= 0 && image === 0 && dy > 80) animateOut();
+          const dx = Math.abs(e.changedTouches[0].clientX - x);
+          if (scrollTop <= 0 && dy > 80 && dy > dx * 1.5) animateOut();
         }}
       >
         {/* Title */}

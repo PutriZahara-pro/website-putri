@@ -26,14 +26,10 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
   }, [activeImage]);
 
   return (
-    <div
-      className="flex-shrink-0 w-full"
-      style={{ height: "55vh", minHeight: 260 }}
-    >
+    <div className="flex-shrink-0 w-full">
       <style>{`
-        /* Swiper's vertical-pagination defaults (top: 50%, right) combined
-           with the overrides below stretched this box over the lower half
-           of the slides, swallowing swipes — pin it to the bullets only. */
+        /* Pin the pagination box to the bullets only — stretched over the
+           slides it swallowed swipes. */
         .mobile-gallery .swiper-pagination {
           position: absolute;
           top: auto !important;
@@ -66,12 +62,14 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
         }
       `}</style>
 
+      {/* Horizontal swipes between images; height follows each image so
+          landscape art no longer sits in tall black bands. Vertical swipes
+          are left to the page (scroll to the info, pull down to go back). */}
       <Swiper
-        className="mobile-gallery w-full h-full"
+        className="mobile-gallery w-full"
         modules={[Pagination]}
-        direction="vertical"
         spaceBetween={6}
-        touchReleaseOnEdges
+        autoHeight
         // Too many bullets would overflow the width — the counter below covers it
         pagination={images.length <= 12 ? { clickable: true } : false}
         onSwiper={(sw) => { swiperRef.current = sw; }}
@@ -80,13 +78,14 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
         style={{ background: "#000" }}
       >
         {images.map((img, i) => (
-          <SwiperSlide key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
+          <SwiperSlide key={i} style={{ background: "#000" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img}
               alt={`${title} ${i + 1}`}
               draggable={false}
-              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+              onLoad={() => swiperRef.current?.updateAutoHeight(0)}
+              style={{ width: "100%", height: "auto", maxHeight: "70vh", objectFit: "contain", display: "block" }}
             />
           </SwiperSlide>
         ))}
