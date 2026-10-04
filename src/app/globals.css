@@ -133,14 +133,6 @@
   100% { transform: translate(1%, 0); }
 }
 
-/* About page entrance. CSS rather than GSAP so it starts with the first
-   paint — waiting for hydration flashed the server-rendered text first.
-   Only "from" states: each element animates to its normal style. */
-@keyframes about-fade-down { from { opacity: 0; transform: translateY(-12px); } }
-@keyframes about-photo-in  { from { opacity: 0; transform: scale(0.97); filter: blur(6px); } }
-@keyframes about-slide-in  { from { opacity: 0; transform: translateX(18px); } }
-@keyframes about-fade-up   { from { opacity: 0; transform: translateY(16px); } }
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
