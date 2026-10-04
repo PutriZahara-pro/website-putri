@@ -144,7 +144,7 @@ export default function Home() {
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 sm:px-6 md:px-10">
           <div className="text-center">
             <p ref={availRef} className="text-white/55 text-[10px] font-mono tracking-[0.3em] uppercase mb-4">
-              Available · Freelance &amp; Full-time
+              Available · Work-study &amp; Internship
             </p>
 
             <h1
@@ -154,7 +154,7 @@ export default function Home() {
             >
               <span className="title-line block">Concept</span>
               <span className="title-line block">Artist &amp;</span>
-              <span className="title-line block">UI/UX Designer</span>
+              <span className="title-line block">Illustrator</span>
             </h1>
 
             <div ref={buttonsRef} className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
