@@ -181,7 +181,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
       >
         <div
           ref={titleLeftRef}
-          className="justify-self-end pr-3 select-none font-serif text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
+          className="justify-self-end pr-3 select-none text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
           style={{ opacity: 0 }}
         >
           PUTRI
@@ -206,7 +206,7 @@ export function LayoutPreloader({ onComplete }: LayoutPreloaderProps) {
 
         <div
           ref={titleRightRef}
-          className="justify-self-start pl-3 select-none font-serif text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
+          className="justify-self-start pl-3 select-none text-[clamp(18px,6vw,96px)] font-bold leading-none tracking-tighter text-neutral-800"
           style={{ opacity: 0 }}
         >
           ZAHARA
