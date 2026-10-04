@@ -1879,7 +1879,7 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto overscroll-y-contain"
         style={{ scrollbarWidth: "thin" }}
         onScroll={(e) => setAtTop(e.currentTarget.scrollTop < 8)}
         onWheel={handleWheel}
@@ -2198,7 +2198,7 @@ function ProjectView({
       {/* ═══════════════ MOBILE LAYOUT ═══════════════ */}
       <div
         data-mobile-layout
-        className="sm:hidden flex flex-col flex-1 overflow-y-auto"
+        className="sm:hidden flex flex-col flex-1 overflow-y-auto overscroll-y-contain"
         style={{ scrollbarWidth: "none" }}
         onTouchStart={(e) => {
           pullRef.current = { y: e.touches[0].clientY, scrollTop: e.currentTarget.scrollTop, image: activeImage };

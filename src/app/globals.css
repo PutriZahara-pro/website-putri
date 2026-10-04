@@ -140,6 +140,10 @@
   html, body {
     overflow-x: hidden;
     max-width: 100vw;
+    /* Pages are full-screen app views with their own pull-down gestures
+       (previous image, back to projects): stop the browser's pull-to-refresh
+       from reloading the site instead. */
+    overscroll-behavior-y: none;
   }
   body {
     @apply bg-background text-foreground;
