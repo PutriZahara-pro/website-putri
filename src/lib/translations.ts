@@ -6,9 +6,11 @@ const t = {
       home:     "← Home",
       projects: "← Projects",
       contact:  "Contact",
+      backHint: "Scroll ↑ or Esc",
     },
     slider: {
       scrollToOpen: "Scroll ↓ to open",
+      tapToOpen:    "Tap or swipe ↑ to open",
       navigate:     "Navigate",
       filters: {
         all:          "All",
@@ -33,6 +35,8 @@ const t = {
     cuisine: {
       pivotHint:   "Scroll ↓ to pivot",
       exploreHint: "Scroll ↓ to explore",
+      pivotHintTouch:   "Swipe ↑ to pivot",
+      exploreHintTouch: "Swipe ↑ to explore",
       goTop:       "Back to top",
     },
     projects: {
@@ -102,9 +106,11 @@ const t = {
       home:     "← Accueil",
       projects: "← Projets",
       contact:  "Contact",
+      backHint: "Défiler ↑ ou Échap",
     },
     slider: {
       scrollToOpen: "Défiler ↓ pour ouvrir",
+      tapToOpen:    "Touchez ou glissez ↑ pour ouvrir",
       navigate:     "Naviguer",
       filters: {
         all:          "Tous",
@@ -129,6 +135,8 @@ const t = {
     cuisine: {
       pivotHint:   "Défiler ↓ pour pivoter",
       exploreHint: "Défiler ↓ pour explorer",
+      pivotHintTouch:   "Glissez ↑ pour pivoter",
+      exploreHintTouch: "Glissez ↑ pour explorer",
       goTop:       "Revenir au début",
     },
     projects: {

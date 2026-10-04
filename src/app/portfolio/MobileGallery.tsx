@@ -26,20 +26,24 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
   }, [activeImage]);
 
   return (
-    <div
-      className="flex-shrink-0 w-full"
-      style={{ height: "55vh", minHeight: 260 }}
-    >
+    <div className="flex-shrink-0 w-full">
       <style>{`
+        /* Pin the pagination box to the bullets only — stretched over the
+           slides it swallowed swipes. */
         .mobile-gallery .swiper-pagination {
           position: absolute;
-          bottom: 12px;
-          left: 50%;
-          transform: translateX(-50%);
+          top: auto !important;
+          right: auto !important;
+          bottom: 12px !important;
+          left: 50% !important;
+          width: auto !important;
+          height: auto !important;
+          transform: translateX(-50%) !important;
           z-index: 10;
           display: flex;
           align-items: center;
           gap: 5px;
+          pointer-events: none;
         }
         .mobile-gallery .swiper-pagination-bullet {
           width: 5px;
@@ -49,6 +53,7 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
           opacity: 1;
           transition: all 0.25s ease;
           margin: 0 !important;
+          pointer-events: auto;
         }
         .mobile-gallery .swiper-pagination-bullet-active {
           width: 18px;
@@ -57,25 +62,30 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
         }
       `}</style>
 
+      {/* Horizontal swipes between images; height follows each image so
+          landscape art no longer sits in tall black bands. Vertical swipes
+          are left to the page (scroll to the info, pull down to go back). */}
       <Swiper
-        className="mobile-gallery w-full h-full"
+        className="mobile-gallery w-full"
         modules={[Pagination]}
-        direction="vertical"
         spaceBetween={6}
-        pagination={{ clickable: true }}
+        autoHeight
+        // Too many bullets would overflow the width — the counter below covers it
+        pagination={images.length <= 12 ? { clickable: true } : false}
         onSwiper={(sw) => { swiperRef.current = sw; }}
         onSlideChange={(sw) => onSlideChange(sw.activeIndex)}
         initialSlide={activeImage}
         style={{ background: "#000" }}
       >
         {images.map((img, i) => (
-          <SwiperSlide key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
+          <SwiperSlide key={i} style={{ background: "#000" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img}
               alt={`${title} ${i + 1}`}
               draggable={false}
-              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+              onLoad={() => swiperRef.current?.updateAutoHeight(0)}
+              style={{ width: "100%", height: "auto", maxHeight: "70vh", objectFit: "contain", display: "block" }}
             />
           </SwiperSlide>
         ))}
