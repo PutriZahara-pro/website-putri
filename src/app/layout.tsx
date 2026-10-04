@@ -25,14 +25,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.putrizahara.com"),
-  title: "Putri Zahara — Concept Artist & UI/UX Designer",
-  description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer. Disponible pour des projets freelance et des opportunités full-time.",
+  title: "Putri Zahara — Concept Artist & Illustrator",
+  description: "Portfolio de Putri Zahara, concept artist et illustratrice. En recherche d'alternance et de stage.",
   openGraph: {
     type: "website",
     url: "/",
     siteName: "Putri Zahara",
-    title: "Putri Zahara — Concept Artist & UI/UX Designer",
-    description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer. Disponible pour des projets freelance et des opportunités full-time.",
+    title: "Putri Zahara — Concept Artist & Illustrator",
+    description: "Portfolio de Putri Zahara, concept artist et illustratrice. En recherche d'alternance et de stage.",
     images: [
       {
         url: "/images/landingpage/Harbor_thumbnail_final_obi_1920.webp",
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Putri Zahara — Concept Artist & UI/UX Designer",
-    description: "Portfolio de Putri Zahara, Concept Artist et UI/UX Designer.",
+    title: "Putri Zahara — Concept Artist & Illustrator",
+    description: "Portfolio de Putri Zahara, concept artist et illustratrice.",
     images: ["/images/landingpage/Harbor_thumbnail_final_obi_1920.webp"],
   },
 };

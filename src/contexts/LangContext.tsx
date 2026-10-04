@@ -20,6 +20,11 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
+  // Keep <html lang> in sync so screen readers pronounce the right language
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const toggle = () => {
     setLang(prev => {
       const next: Lang = prev === "en" ? "fr" : "en";

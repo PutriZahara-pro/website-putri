@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { useLang } from "@/contexts/LangContext";
 
 interface ContactModalProps {
@@ -20,6 +21,9 @@ declare global {
 const MAX_NAME    = 100;
 const MAX_EMAIL   = 254;
 const MAX_MESSAGE = 5000;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; // same rule as /api/contact
+
+type FieldErrors = { name?: boolean; email?: boolean; message?: boolean };
 
 export function ContactModal({ onClose }: ContactModalProps) {
   const overlayRef  = useRef<HTMLDivElement>(null);
@@ -39,6 +43,28 @@ export function ContactModal({ onClose }: ContactModalProps) {
   const [email,   setEmail]   = useState("");
   const [message, setMessage] = useState("");
   const [hp,      setHp]      = useState("");
+  const [errors,  setErrors]  = useState<FieldErrors>({});
+
+  // Keep Tab inside the dialog, and give focus back to whatever opened it.
+  // Declared before the autofocus effect so it still sees the opener.
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const items = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([tabindex="-1"]), textarea, iframe, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus?.();
+    };
+  }, []);
 
   // Mount + autofocus first field
   useEffect(() => {
@@ -121,7 +147,19 @@ export function ContactModal({ onClose }: ContactModalProps) {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) return;
+    // Tell the visitor what is missing instead of silently ignoring the click
+    const next: FieldErrors = {
+      name:    !name.trim(),
+      email:   !EMAIL_REGEX.test(email.trim()),
+      message: !message.trim(),
+    };
+    if (next.name || next.email || next.message) {
+      setErrors(next);
+      const firstId = next.name ? "contact-name" : next.email ? "contact-email" : "contact-message";
+      document.getElementById(firstId)?.focus();
+      return;
+    }
+    setErrors({});
 
     if (tokenRef.current) {
       doSubmit(tokenRef.current);
@@ -140,6 +178,11 @@ export function ContactModal({ onClose }: ContactModalProps) {
   }, [name, email, message, doSubmit]);
 
   const isForm = step === "form";
+  const missing = [
+    errors.name    && (lang === "fr" ? "votre nom" : "your name"),
+    errors.email   && (lang === "fr" ? "un e-mail valide" : "a valid email"),
+    errors.message && (lang === "fr" ? "votre message" : "your message"),
+  ].filter(Boolean).join(", ");
 
   return (
     <div
@@ -161,12 +204,12 @@ export function ContactModal({ onClose }: ContactModalProps) {
           className="flex items-center justify-between px-4 border-b"
           style={{ height: 32, borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
         >
-          <span id="contact-modal-title" className="text-[8px] font-mono tracking-[0.35em] uppercase text-white/25">
+          <span id="contact-modal-title" className="text-[8px] font-mono tracking-[0.35em] uppercase text-white/55">
             contact.txt
           </span>
           <button
             onClick={onClose}
-            className="text-white/30 hover:text-white text-[16px] bg-transparent border-none cursor-pointer leading-none"
+            className="text-white/60 hover:text-white text-[16px] bg-transparent border-none cursor-pointer leading-none"
             aria-label={lang === "fr" ? "Fermer" : "Close"}
           >
             ×
@@ -184,7 +227,7 @@ export function ContactModal({ onClose }: ContactModalProps) {
               />
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="contact-name" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/30">
+                <label htmlFor="contact-name" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/65">
                   {lang === "fr" ? "Nom" : "Name"}
                 </label>
                 <input
@@ -192,39 +235,51 @@ export function ContactModal({ onClose }: ContactModalProps) {
                   id="contact-name" name="name"
                   required maxLength={MAX_NAME} autoComplete="name"
                   value={name} onChange={e => setName(e.target.value)}
+                  aria-invalid={errors.name || undefined}
+                  aria-describedby={errors.name ? "contact-errors" : undefined}
                   className="bg-transparent text-white text-[12px] font-mono px-3 py-2 outline-none focus:border-white/40"
                   style={{ border: "1px solid rgba(255,255,255,0.12)" }}
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="contact-email" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/30">
+                <label htmlFor="contact-email" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/65">
                   Email
                 </label>
                 <input
                   id="contact-email" name="email"
                   required type="email" maxLength={MAX_EMAIL} autoComplete="email"
                   value={email} onChange={e => setEmail(e.target.value)}
+                  aria-invalid={errors.email || undefined}
+                  aria-describedby={errors.email ? "contact-errors" : undefined}
                   className="bg-transparent text-white text-[12px] font-mono px-3 py-2 outline-none focus:border-white/40"
                   style={{ border: "1px solid rgba(255,255,255,0.12)" }}
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="contact-message" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/30">
+                <label htmlFor="contact-message" className="text-[8px] font-mono tracking-[0.3em] uppercase text-white/65">
                   Message
                 </label>
                 <textarea
                   id="contact-message" name="message"
                   required rows={4} maxLength={MAX_MESSAGE}
                   value={message} onChange={e => setMessage(e.target.value)}
+                  aria-invalid={errors.message || undefined}
+                  aria-describedby={errors.message ? "contact-errors" : undefined}
                   className="bg-transparent text-white text-[12px] font-mono px-3 py-2 outline-none resize-none focus:border-white/40"
                   style={{ border: "1px solid rgba(255,255,255,0.12)" }}
                 />
-                <span className="text-[8px] font-mono text-white/20 text-right">
+                <span className="text-[8px] font-mono text-white/50 text-right" aria-hidden="true">
                   {message.length} / {MAX_MESSAGE}
                 </span>
               </div>
+
+              {missing && (
+                <p id="contact-errors" role="alert" className="text-[10px] font-mono tracking-[0.1em] text-red-300">
+                  {lang === "fr" ? `Merci d'indiquer ${missing}.` : `Please enter ${missing}.`}
+                </p>
+              )}
 
               <button
                 type="submit"
@@ -236,11 +291,20 @@ export function ContactModal({ onClose }: ContactModalProps) {
                   ? (lang === "fr" ? "Vérification…" : "Verifying…")
                   : (lang === "fr" ? "Envoyer →" : "Send →")}
               </button>
+
+              <p className="text-[9px] font-mono leading-[1.6] text-white/55">
+                {lang === "fr"
+                  ? "Vos nom, e-mail et message servent uniquement à vous répondre. Formulaire protégé contre le spam par Cloudflare. "
+                  : "Your name, email and message are only used to reply to you. Spam protection by Cloudflare. "}
+                <Link href="/legal#confidentialite" onClick={onClose} className="underline underline-offset-2 text-white/75 hover:text-white">
+                  {lang === "fr" ? "Confidentialité" : "Privacy"}
+                </Link>
+              </p>
             </form>
           )}
 
           {step === "sending" && (
-            <p className="text-white/45 text-[10px] font-mono tracking-[0.25em] uppercase text-center py-4" role="status">
+            <p className="text-white/65 text-[10px] font-mono tracking-[0.25em] uppercase text-center py-4" role="status">
               {lang === "fr" ? "Envoi en cours…" : "Sending…"}
             </p>
           )}
@@ -270,7 +334,7 @@ export function ContactModal({ onClose }: ContactModalProps) {
                     }
                   } catch { /* widget may have been cleaned up */ }
                 }}
-                className="text-white/40 text-[9px] font-mono tracking-[0.2em] uppercase hover:text-white bg-transparent border-none cursor-pointer"
+                className="text-white/70 text-[9px] font-mono tracking-[0.2em] uppercase hover:text-white bg-transparent border-none cursor-pointer"
               >
                 {lang === "fr" ? "Réessayer" : "Retry"}
               </button>
