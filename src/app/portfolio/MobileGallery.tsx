@@ -31,15 +31,23 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
       style={{ height: "55vh", minHeight: 260 }}
     >
       <style>{`
+        /* Swiper's vertical-pagination defaults (top: 50%, right) combined
+           with the overrides below stretched this box over the lower half
+           of the slides, swallowing swipes — pin it to the bullets only. */
         .mobile-gallery .swiper-pagination {
           position: absolute;
-          bottom: 12px;
-          left: 50%;
-          transform: translateX(-50%);
+          top: auto !important;
+          right: auto !important;
+          bottom: 12px !important;
+          left: 50% !important;
+          width: auto !important;
+          height: auto !important;
+          transform: translateX(-50%) !important;
           z-index: 10;
           display: flex;
           align-items: center;
           gap: 5px;
+          pointer-events: none;
         }
         .mobile-gallery .swiper-pagination-bullet {
           width: 5px;
@@ -49,6 +57,7 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
           opacity: 1;
           transition: all 0.25s ease;
           margin: 0 !important;
+          pointer-events: auto;
         }
         .mobile-gallery .swiper-pagination-bullet-active {
           width: 18px;
@@ -62,7 +71,9 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
         modules={[Pagination]}
         direction="vertical"
         spaceBetween={6}
-        pagination={{ clickable: true }}
+        touchReleaseOnEdges
+        // Too many bullets would overflow the width — the counter below covers it
+        pagination={images.length <= 12 ? { clickable: true } : false}
         onSwiper={(sw) => { swiperRef.current = sw; }}
         onSlideChange={(sw) => onSlideChange(sw.activeIndex)}
         initialSlide={activeImage}

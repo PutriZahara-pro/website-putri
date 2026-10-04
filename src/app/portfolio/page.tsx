@@ -303,6 +303,30 @@ function GridLines() {
   );
 }
 
+/* ── "← Projects" — outlined like the filter pills so it reads as a button.
+   On desktop, `showHint` reveals the scroll-up / Esc shortcuts underneath
+   while those gestures would actually close the project. ── */
+function BackToProjects({ onClick, showHint = false }: { onClick: () => void; showHint?: boolean }) {
+  const { lang } = useLang();
+  return (
+    <div className="relative flex flex-col items-center">
+      <button
+        onClick={onClick}
+        className="font-mono text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-white/80 hover:text-white border border-white/25 hover:border-white/70 bg-white/[0.04] hover:bg-white/10 px-3 sm:px-4 py-2 transition-colors cursor-pointer"
+      >
+        {t[lang].nav.projects}
+      </button>
+      <span
+        aria-hidden="true"
+        className="hidden sm:block absolute top-full mt-1 whitespace-nowrap font-mono text-[8px] tracking-[0.3em] uppercase text-white/40 pointer-events-none transition-opacity duration-500"
+        style={{ opacity: showHint ? 1 : 0 }}
+      >
+        {t[lang].nav.backHint}
+      </span>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────
    SLIDER VIEW  — Expandable Card Carousel
    Active card expands + stays centered.
@@ -359,23 +383,37 @@ function SliderView({
     if (!isDraggingRef.current) setExpandedIdx(activeIdx);
   }, [activeIdx]);
 
+  /* Card sizes live in CSS variables on outerRef (wider active card on
+     phones) so the math below always matches what is rendered. */
+  const getSizes = useCallback(() => {
+    const outer = outerRef.current;
+    if (!outer) return { activeFrac: ACTIVE_VW, inactiveW: INACTIVE_W };
+    const cs = getComputedStyle(outer);
+    return {
+      activeFrac: parseFloat(cs.getPropertyValue("--active-frac")) || ACTIVE_VW,
+      inactiveW:  parseFloat(cs.getPropertyValue("--inactive-w"))  || INACTIVE_W,
+    };
+  }, []);
+
   /* translateX so card at `idx` is centered inside outerRef */
   /* Center card idx assuming ACTIVE card is expanded (normal state) */
   const getX = useCallback((idx: number): number => {
     const outer = outerRef.current;
     if (!outer) return 0;
-    const activeW           = ACTIVE_VW * outer.offsetWidth;
-    const activeCenterInRow = idx * (INACTIVE_W + CARD_GAP) + activeW / 2;
+    const { activeFrac, inactiveW } = getSizes();
+    const activeW           = activeFrac * outer.offsetWidth;
+    const activeCenterInRow = idx * (inactiveW + CARD_GAP) + activeW / 2;
     return outer.offsetWidth / 2 - activeCenterInRow;
-  }, []);
+  }, [getSizes]);
 
-  /* Center card idx assuming ALL cards are INACTIVE_W (used during drag) */
+  /* Center card idx assuming ALL cards are inactive width (used during drag) */
   const getDragX = useCallback((idx: number): number => {
     const outer = outerRef.current;
     if (!outer) return 0;
-    const center = idx * (INACTIVE_W + CARD_GAP) + INACTIVE_W / 2;
+    const { inactiveW } = getSizes();
+    const center = idx * (inactiveW + CARD_GAP) + inactiveW / 2;
     return outer.offsetWidth / 2 - center;
-  }, []);
+  }, [getSizes]);
 
   /* ── BEFORE PAINT: position strip at correct x ──
      opacity:0 is already in JSX so SSR HTML is invisible.
@@ -470,6 +508,25 @@ function SliderView({
     if (e.deltaY > 30) onOpen();
   }, [onOpen]);
 
+  /* Swipe ↑ below the strip (where the "swipe ↑ to open" hint sits) opens
+     the project too; the strip itself handles its own gestures. */
+  const swipeRef = useRef({ x: 0, y: 0, skip: true });
+  const handleSwipeStart = useCallback((e: React.TouchEvent) => {
+    const el = e.target as HTMLElement;
+    swipeRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      skip: !!el.closest("[data-strip], nav, button, a"),
+    };
+  }, []);
+  const handleSwipeEnd = useCallback((e: React.TouchEvent) => {
+    const s = swipeRef.current;
+    if (s.skip) return;
+    const dy = s.y - e.changedTouches[0].clientY;
+    const dx = Math.abs(e.changedTouches[0].clientX - s.x);
+    if (dy > 50 && dy > dx) onOpen();
+  }, [onOpen]);
+
   /* ── Roulette carousel — Nintendo Switch style ───────────────────────
      • Strip follows pointer 1:1 (no rubber band — free roulette)
      • First/last card CAN be at center (no blocking)
@@ -486,6 +543,10 @@ function SliderView({
     vHistory:   [] as number[],
     lastMoveX:  0,
     lastMoveT:  0,
+    startY:     0,
+    lastY:      0,
+    vertical:   false, // gesture locked to the vertical axis (touch swipe ↑ = open)
+    step:       110,
   });
 
   /* Current strip translateX read from DOM (works during/after GSAP) */
@@ -510,11 +571,11 @@ function SliderView({
   }, [getX, projects.length]);
 
   /* ── Roulette drag — TAC TAC TAC continuous step while holding ─────────
-     During drag: each STEP_PX crossed → step 1 card, re-anchor drag origin.
+     During drag: each step (d.step px) crossed → step 1 card, re-anchor drag origin.
      No blocking. Continuous molette feel like Nintendo Switch.
      Document-level listeners prevent browser swallowing events.
   ─────────────────────────────────────────────────────────────────────── */
-  const STEP_PX = 110; // px between TAC steps (≈ inactive card width)
+  // px between TAC steps ≈ one inactive card + gap, min 90 (set per drag in dragRef.step)
 
   // Live ref so drag closures always see current activeIdx
   const liveIdxRef = useRef(activeIdx);
@@ -532,7 +593,7 @@ function SliderView({
 
   const DRAG_ACTIVATE_PX = 8; // px before drag mode activates (below = click)
 
-  const startCarouselDrag = useCallback((clientX: number) => {
+  const startCarouselDrag = useCallback((clientX: number, clientY: number, touchTarget?: EventTarget | null) => {
     gsap.killTweensOf(innerRef.current);
     // Do NOT set isDragging yet — wait for actual movement
     const startT = getStripX();
@@ -546,18 +607,32 @@ function SliderView({
       vHistory:   [],
       lastMoveX:  clientX,
       lastMoveT:  performance.now(),
+      startY:     clientY,
+      lastY:      clientY,
+      vertical:   false,
+      // ≥ 90px so a normal phone swipe moves one card, not two
+      step:       Math.max(90, getSizes().inactiveW + CARD_GAP - 10),
     };
     document.body.style.userSelect = "none";
 
     const onMove = (ev: MouseEvent | TouchEvent) => {
-      const x = "touches" in ev
-        ? (ev as TouchEvent).touches[0].clientX
-        : (ev as MouseEvent).clientX;
+      const pt = "touches" in ev ? (ev as TouchEvent).touches[0] : (ev as MouseEvent);
+      const x = pt.clientX;
       const d = dragRef.current;
       if (!d.active) return;
 
       const dx = x - d.startX;
       d.moved = Math.max(d.moved, Math.abs(dx));
+      d.lastY = pt.clientY;
+      if (d.vertical) return;
+
+      // Mostly-vertical gesture before any horizontal drag: lock to vertical
+      // so a swipe ↑ can open the project instead of nudging the strip.
+      const dyAbs = Math.abs(d.lastY - d.startY);
+      if (!isDraggingRef.current && dyAbs > 12 && dyAbs > d.moved) {
+        d.vertical = true;
+        return;
+      }
 
       // Activate drag mode only after real movement
       if (!isDraggingRef.current && d.moved > DRAG_ACTIVATE_PX) {
@@ -579,14 +654,14 @@ function SliderView({
 
       gsap.set(innerRef.current, { x: d.startTrans + dx });
 
-      // TAC: crossed STEP_PX → step 1 card + re-anchor
-      if (dx <= -STEP_PX) {
+      // TAC: crossed one step → step 1 card + re-anchor
+      if (dx <= -d.step) {
         const cur  = liveIdxRef.current;
         const next = Math.min(cur + 1, projects.length - 1);
         if (next !== cur) onSetIdx(next);
         d.startX     = x;
         d.startTrans = d.startTrans + dx;
-      } else if (dx >= STEP_PX) {
+      } else if (dx >= d.step) {
         const cur  = liveIdxRef.current;
         const next = Math.max(cur - 1, 0);
         if (next !== cur) onSetIdx(next);
@@ -595,6 +670,11 @@ function SliderView({
       }
     };
 
+    // Touch events keep firing on the element the finger went down on, even
+    // after React unmounts it (the active card's overlay disappears as soon as
+    // the drag starts) — and a detached node no longer bubbles to document.
+    // So touch listeners go on that element; mouse listeners on document.
+    const touchEl = touchTarget ?? document;
     const onUp = () => {
       const finalIdx = liveIdxRef.current;
       dragRef.current.active = false;
@@ -602,12 +682,17 @@ function SliderView({
       document.body.style.userSelect = "";
       document.removeEventListener("mousemove",   onMove);
       document.removeEventListener("mouseup",     onUp);
-      document.removeEventListener("touchmove",   onMove);
-      document.removeEventListener("touchend",    onUp);
-      document.removeEventListener("touchcancel", onUp);
+      touchEl.removeEventListener("touchmove",   onMove as EventListener);
+      touchEl.removeEventListener("touchend",    onUp);
+      touchEl.removeEventListener("touchcancel", onUp);
       activeUpRef.current = null;
 
-      if (!isDraggingRef.current) return; // was a click — onClick handles it
+      if (!isDraggingRef.current) {
+        // Touch swipe ↑ on the strip opens the project (desktop: scroll ↓)
+        const d = dragRef.current;
+        if (d.vertical && d.startY - d.lastY > 50) onOpen();
+        return; // otherwise it was a click — onClick handles it
+      }
 
       // Exit drag: expand card, snap strip
       isDraggingRef.current = false;
@@ -619,18 +704,22 @@ function SliderView({
     };
 
     activeUpRef.current = onUp;
-    document.addEventListener("mousemove",   onMove);
-    document.addEventListener("mouseup",     onUp);
-    document.addEventListener("touchmove",   onMove, { passive: false });
-    document.addEventListener("touchend",    onUp);
-    document.addEventListener("touchcancel", onUp);
+    if (touchTarget) {
+      touchEl.addEventListener("touchmove",   onMove as EventListener, { passive: false });
+      touchEl.addEventListener("touchend",    onUp);
+      touchEl.addEventListener("touchcancel", onUp);
+    } else {
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup",   onUp);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getDragX, getStripX, getX, onSetIdx, projects.length]);
+  }, [getDragX, getSizes, getStripX, getX, onOpen, onSetIdx, projects.length]);
 
   const handlePointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if ("button" in e && e.button !== 0) return;
-    const x = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    startCarouselDrag(x);
+    const isTouch = "touches" in e;
+    const pt = isTouch ? e.touches[0] : (e as React.MouseEvent);
+    startCarouselDrag(pt.clientX, pt.clientY, isTouch ? e.target : null);
   }, [startCarouselDrag]);
 
   // Block card onClick if user dragged
@@ -646,6 +735,8 @@ function SliderView({
     <main
       className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col"
       onWheel={handleWheel}
+      onTouchStart={handleSwipeStart}
+      onTouchEnd={handleSwipeEnd}
     >
       <GridLines />
 
@@ -707,7 +798,8 @@ function SliderView({
           Pointer events handle drag/swipe for both mouse and touch. */}
       <div
         ref={outerRef}
-        className="relative z-10 flex-1 flex items-center overflow-hidden"
+        data-strip
+        className="relative z-10 flex-1 flex items-center overflow-hidden [--active-frac:0.62] [--inactive-w:64px] sm:[--active-frac:0.36] sm:[--inactive-w:120px]"
         onMouseDown={handlePointerDown}
         onTouchStart={handlePointerDown}
         onClickCapture={onCardClickCapture}
@@ -735,7 +827,7 @@ function SliderView({
                 onClick={() => isActive ? onOpen() : onSetIdx(i)}
                 className="relative flex-shrink-0 overflow-hidden cursor-pointer group"
                 style={{
-                  width:      isExpanded ? `${ACTIVE_VW * 100}vw` : `${INACTIVE_W}px`,
+                  width:      isExpanded ? "calc(var(--active-frac) * 100vw)" : "var(--inactive-w)",
                   height:     isExpanded ? "clamp(200px,66vh,74vh)" : "clamp(160px,56vh,62vh)",
                   transition: "width 0.32s cubic-bezier(0.16,1,0.3,1), height 0.32s cubic-bezier(0.16,1,0.3,1)",
                 }}
@@ -786,7 +878,7 @@ function SliderView({
                       </p>
                       <h2
                         className="text-white font-black uppercase leading-[0.88] tracking-[-0.02em]"
-                        style={{ fontSize: "clamp(16px, 4vw, 48px)" }}
+                        style={{ fontSize: "clamp(20px, 4vw, 48px)" }}
                       >
                         {lp.title}
                       </h2>
@@ -816,11 +908,14 @@ function SliderView({
       {/* Scroll-to-open hint */}
       <div className="relative z-10 flex items-center justify-center -mt-16 sm:-mt-24 pb-4 sm:pb-12 flex-shrink-0 pointer-events-none">
         <div className="flex items-center gap-2">
-          <span className="text-white text-[11px] font-bold font-mono tracking-[0.35em] uppercase">
+          <span className="text-white text-[11px] font-bold font-mono tracking-[0.35em] uppercase pointer-coarse:hidden">
             {t[lang].slider.scrollToOpen}
           </span>
+          <span className="hidden pointer-coarse:inline text-white text-[10px] font-bold font-mono tracking-[0.3em] uppercase">
+            {t[lang].slider.tapToOpen}
+          </span>
           <span
-            className="text-white text-[15px] font-bold leading-none"
+            className="text-white text-[15px] font-bold leading-none pointer-coarse:hidden"
             style={{ animation: "scroll-hint-arrow 1.4s ease-in-out infinite" }}
           >
             ↓
@@ -869,7 +964,7 @@ function SliderView({
         </div>
 
         {/* Right — year */}
-        <span className="justify-self-end text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase">{active.year}</span>
+        <span className="col-start-3 justify-self-end text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase">{active.year}</span>
       </div>
     </main>
   );
@@ -1252,6 +1347,10 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
     phase === 0 ? t[lang].cuisine.pivotHint :
     phase === 1 ? t[lang].cuisine.exploreHint :
     `${screenIdx + 1} / ${CUISINE_SCREENS.length}`;
+  const hintTextTouch =
+    phase === 0 ? t[lang].cuisine.pivotHintTouch :
+    phase === 1 ? t[lang].cuisine.exploreHintTouch :
+    hintText;
 
   return (
     <main
@@ -1263,16 +1362,11 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
       <GridLines />
 
       {/* NAV */}
-      <nav ref={navRef} className="relative z-10 flex items-center justify-between px-10 py-5 flex-shrink-0">
-        <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
+      <nav ref={navRef} className="relative z-10 flex items-center justify-between px-5 sm:px-10 py-3 sm:py-5 flex-shrink-0">
+        <Link href="/" className="text-[11px] sm:text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
           {t[lang].nav.home}
         </Link>
-        <button
-          onClick={animateOut}
-          className="text-[11px] font-mono tracking-[0.25em] text-white/45 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer"
-        >
-          {t[lang].nav.projects}
-        </button>
+        <BackToProjects onClick={animateOut} showHint={phase === 0} />
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
           <NavContactButton />
@@ -1455,7 +1549,8 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
         {/* Right side: hint + up button */}
         <div ref={hintRef} className="flex items-center gap-3">
           <span className="text-white/30 text-[9px] font-mono tracking-[0.3em] uppercase">
-            {hintText}
+            <span className="pointer-coarse:hidden">{hintText}</span>
+            <span className="hidden pointer-coarse:inline">{hintTextTouch}</span>
           </span>
 
           {/* Up button — visible when past phase 0 */}
@@ -1552,13 +1647,11 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY; }}
       onTouchEnd={(e) => { if (e.changedTouches[0].clientY - touchY.current > 60) animateOut(); }}
     >
-      <nav ref={navRef} className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-10 py-5">
-        <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
+      <nav ref={navRef} className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 sm:px-10 py-3 sm:py-5">
+        <Link href="/" className="text-[11px] sm:text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
           {t[lang].nav.home}
         </Link>
-        <button onClick={animateOut} className="text-[11px] font-mono tracking-[0.25em] text-white/45 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer">
-          {t[lang].nav.projects}
-        </button>
+        <BackToProjects onClick={animateOut} showHint />
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
           <NavContactButton />
@@ -1690,6 +1783,8 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
   const wheelRef   = useRef(0);
   const mountTime  = useRef(Date.now());
   const touchY     = useRef(0);
+  const touchTop   = useRef(0); // scrollTop when the touch began
+  const [atTop, setAtTop] = useState(true);
 
   const animateOut = useCallback(() => {
     if (closingRef.current) return;
@@ -1760,27 +1855,25 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
   }, [animateOut]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchY.current = e.touches[0].clientY;
+    touchY.current   = e.touches[0].clientY;
+    touchTop.current = scrollRef.current?.scrollTop ?? 0;
   }, []);
+  // Pull down only closes when the page was already at the top before the
+  // gesture — scrolling back up to the top no longer closes it by accident.
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const el = scrollRef.current;
     if (!el) return;
     const dy = e.changedTouches[0].clientY - touchY.current;
-    if (el.scrollTop === 0 && dy > 60) animateOut();
+    if (touchTop.current <= 0 && el.scrollTop <= 0 && dy > 80) animateOut();
   }, [animateOut]);
 
   return (
     <main className="h-[100dvh] w-screen max-w-full overflow-hidden bg-black flex flex-col">
-      <nav ref={navRef} className="relative z-30 flex items-center justify-between px-10 py-5 flex-shrink-0 bg-black/80 backdrop-blur-md border-b border-white/5">
-        <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
-          ← Home
+      <nav ref={navRef} className="relative z-30 flex items-center justify-between px-5 sm:px-10 py-3 sm:py-5 flex-shrink-0 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <Link href="/" className="text-[11px] sm:text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
+          {t[lang].nav.home}
         </Link>
-        <button
-          onClick={animateOut}
-          className="text-[11px] font-mono tracking-[0.25em] text-white/45 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer"
-        >
-          ← Projects
-        </button>
+        <BackToProjects onClick={animateOut} showHint={atTop} />
         <NavContactButton />
       </nav>
 
@@ -1788,6 +1881,7 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
         ref={scrollRef}
         className="flex-1 overflow-y-auto"
         style={{ scrollbarWidth: "thin" }}
+        onScroll={(e) => setAtTop(e.currentTarget.scrollTop < 8)}
         onWheel={handleWheel}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -2043,8 +2137,12 @@ function ProjectView({
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchOnMain  = useRef(false); // true only if touchstart fired on <main>
+  const pullRef      = useRef({ y: 0, scrollTop: 0, image: 0 }); // phone pull-to-close
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (isDragging.current) return;
+    // The phone layout handles its own gestures (vertical gallery + pull-down
+    // to close); handling them here too closed the project on a swipe ↓.
+    if ((e.target as HTMLElement).closest("[data-mobile-layout]")) { touchOnMain.current = false; return; }
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     touchOnMain.current = true;
@@ -2086,16 +2184,11 @@ function ProjectView({
       <GridLines />
 
       {/* NAV */}
-      <nav ref={navRef} className="relative z-10 flex items-center justify-between px-10 py-5 flex-shrink-0">
-        <Link href="/" className="text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
+      <nav ref={navRef} className="relative z-10 flex items-center justify-between px-5 sm:px-10 py-3 sm:py-5 flex-shrink-0">
+        <Link href="/" className="text-[11px] sm:text-[12px] font-bold tracking-[0.25em] text-white uppercase opacity-70 hover:opacity-100 transition-opacity">
           {t[lang].nav.home}
         </Link>
-        <button
-          onClick={animateOut}
-          className="text-[11px] font-mono tracking-[0.25em] text-white/45 hover:text-white uppercase transition-colors bg-transparent border-none cursor-pointer"
-        >
-          {t[lang].nav.projects}
-        </button>
+        <BackToProjects onClick={animateOut} showHint={activeImage === 0} />
         <div className="flex items-center gap-3">
           <LangToggle className="text-white" />
           <NavContactButton />
@@ -2104,13 +2197,18 @@ function ProjectView({
 
       {/* ═══════════════ MOBILE LAYOUT ═══════════════ */}
       <div
+        data-mobile-layout
         className="sm:hidden flex flex-col flex-1 overflow-y-auto"
         style={{ scrollbarWidth: "none" }}
-        onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
+        onTouchStart={(e) => {
+          pullRef.current = { y: e.touches[0].clientY, scrollTop: e.currentTarget.scrollTop, image: activeImage };
+        }}
         onTouchEnd={(e) => {
-          const el = e.currentTarget;
-          const dy = e.changedTouches[0].clientY - touchStartY.current;
-          if (el.scrollTop === 0 && dy > 60) animateOut();
+          // Pull down = back to projects, but only from the very top on the
+          // first image; on later images the gallery goes to the previous one.
+          const { y, scrollTop, image } = pullRef.current;
+          const dy = e.changedTouches[0].clientY - y;
+          if (scrollTop <= 0 && image === 0 && dy > 80) animateOut();
         }}
       >
         {/* Title */}
@@ -2628,6 +2726,18 @@ export default function Portfolio() {
     tl.to(pl, { y: "100%", duration: 0.85, ease: "power3.inOut" }, 0);
     tl.to(sl, { y: 0,      duration: 0.85, ease: "power3.inOut" }, 0);
   }, []);
+
+  /* Esc closes the open project — unless the contact dialog is on top,
+     which handles Esc itself */
+  useEffect(() => {
+    if (!openProject) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || document.querySelector('[role="dialog"]')) return;
+      closeProject();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openProject, closeProject]);
 
   /* Q / ← = prev · D / → = next (slider only) */
   useEffect(() => {
