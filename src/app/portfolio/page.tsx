@@ -9,6 +9,7 @@ import * as THREE from "three";
 import MobileGallery from "./MobileGallery";
 import { useLang } from "@/contexts/LangContext";
 import { NavContactButton } from "@/components/ui/nav-contact-button";
+import { NavAboutLink } from "@/components/ui/nav-about-link";
 import LangToggle from "@/components/ui/lang-toggle";
 import t from "@/lib/translations";
 import type { Lang } from "@/lib/translations";
@@ -758,8 +759,9 @@ function SliderView({
             {active.num} / {String(n).padStart(2, "0")}
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-5">
           <LangToggle className="text-white" />
+          <NavAboutLink />
           <NavContactButton />
         </div>
       </nav>
@@ -1376,8 +1378,9 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
           {t[lang].nav.home}
         </Link>
         <BackToProjects onClick={animateOut} showHint={phase === 0} />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-5">
           <LangToggle className="text-white" />
+          <NavAboutLink />
           <NavContactButton />
         </div>
       </nav>
@@ -1661,8 +1664,9 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
           {t[lang].nav.home}
         </Link>
         <BackToProjects onClick={animateOut} showHint />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-5">
           <LangToggle className="text-white" />
+          <NavAboutLink />
           <NavContactButton />
         </div>
       </nav>
@@ -1897,7 +1901,10 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
           {t[lang].nav.home}
         </Link>
         <BackToProjects onClick={animateOut} showHint={atTop} />
-        <NavContactButton />
+        <div className="flex items-center gap-3 sm:gap-5">
+          <NavAboutLink />
+          <NavContactButton />
+        </div>
       </nav>
 
       <div
@@ -2212,8 +2219,9 @@ function ProjectView({
           {t[lang].nav.home}
         </Link>
         <BackToProjects onClick={animateOut} showHint={activeImage === 0} />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-5">
           <LangToggle className="text-white" />
+          <NavAboutLink />
           <NavContactButton />
         </div>
       </nav>
