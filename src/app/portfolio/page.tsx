@@ -318,7 +318,7 @@ function BackToProjects({ onClick, showHint = false }: { onClick: () => void; sh
       </button>
       <span
         aria-hidden="true"
-        className="hidden sm:block absolute top-full mt-1 whitespace-nowrap font-mono text-[8px] tracking-[0.3em] uppercase text-white/40 pointer-events-none transition-opacity duration-500"
+        className="hidden sm:block absolute top-full mt-1 whitespace-nowrap font-mono text-[8px] tracking-[0.3em] uppercase text-white/55 pointer-events-none transition-opacity duration-500"
         style={{ opacity: showHint ? 1 : 0 }}
       >
         {t[lang].nav.backHint}
@@ -754,7 +754,7 @@ function SliderView({
               }} />
             ))}
           </div>
-          <span className="text-[10px] font-mono tracking-[0.2em] text-white/40">
+          <span className="text-[10px] font-mono tracking-[0.2em] text-white/55">
             {active.num} / {String(n).padStart(2, "0")}
           </span>
         </div>
@@ -782,7 +782,7 @@ function SliderView({
                   textTransform: "uppercase",
                   padding: "5px 10px",
                   border: isActive ? "1px solid rgba(255,255,255,0.7)" : "1px solid rgba(255,255,255,0.15)",
-                  color:  isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)",
+                  color:  isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.6)",
                   background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
                   whiteSpace: "nowrap",
                 }}
@@ -824,7 +824,15 @@ function SliderView({
             return (
               <div
                 key={p.num}
+                role="button"
+                tabIndex={0}
+                aria-label={isActive ? `${lp.title} — ${lang === "fr" ? "ouvrir le projet" : "open project"}` : lp.title}
                 onClick={() => isActive ? onOpen() : onSetIdx(i)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  if (isActive) onOpen(); else onSetIdx(i);
+                }}
                 className="relative flex-shrink-0 overflow-hidden cursor-pointer group"
                 style={{
                   width:      isExpanded ? "calc(var(--active-frac) * 100vw)" : "var(--inactive-w)",
@@ -873,7 +881,7 @@ function SliderView({
                   <>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-7">
-                      <p className="text-white/45 text-[9px] font-mono tracking-[0.32em] uppercase mb-3">
+                      <p className="text-white/55 text-[9px] font-mono tracking-[0.32em] uppercase mb-3">
                         {lp.num} · {lp.category}
                       </p>
                       <h2
@@ -892,6 +900,7 @@ function SliderView({
                 {!isExpanded && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span
+                      aria-hidden="true"
                       className="text-white/20 text-[8px] font-mono tracking-[0.4em] uppercase select-none"
                       style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
                     >
@@ -936,7 +945,7 @@ function SliderView({
         style={{ gridTemplateColumns: "1fr auto 1fr" }}
       >
         {/* Left — project type */}
-        <span className="justify-self-start text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase">{active.type}</span>
+        <span className="justify-self-start text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase">{active.type}</span>
 
         {/* Center — keyboard hints (hidden on mobile) */}
         <div className="justify-self-center hidden sm:flex items-center gap-5">
@@ -958,13 +967,13 @@ function SliderView({
                 {i === 0 && <span className="text-white/30 text-[10px]">·</span>}
               </div>
             ))}
-            <span className="text-white/45 text-[9px] font-mono tracking-[0.2em] uppercase ml-1">{t[lang].slider.navigate}</span>
+            <span className="text-white/55 text-[9px] font-mono tracking-[0.2em] uppercase ml-1">{t[lang].slider.navigate}</span>
           </div>
 
         </div>
 
         {/* Right — year */}
-        <span className="col-start-3 justify-self-end text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase">{active.year}</span>
+        <span className="col-start-3 justify-self-end text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase">{active.year}</span>
       </div>
     </main>
   );
@@ -1455,7 +1464,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
             className="pointer-events-none flex flex-col items-center gap-[6px] mt-3"
             style={{ opacity: phase === 0 ? 1 : 0, transition: "opacity 0.5s ease" }}
           >
-            <span className="text-white/25 text-[8px] font-mono tracking-[0.4em] uppercase">scroll down</span>
+            <span className="text-white/55 text-[8px] font-mono tracking-[0.4em] uppercase">scroll down</span>
             <div style={{
               width: "1px", height: "22px",
               background: "linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)",
@@ -1483,7 +1492,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
           }}
         >
             {/* Screen counter */}
-            <p className="text-white/25 text-[8px] font-mono tracking-[0.4em] uppercase mb-8">
+            <p className="text-white/55 text-[8px] font-mono tracking-[0.4em] uppercase mb-8">
               {String(displayIdx + 1).padStart(2, "0")} / {String(CUISINE_SCREENS.length).padStart(2, "0")}
             </p>
 
@@ -1502,7 +1511,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
             {/* Description */}
             <p
               ref={textDescRef}
-              className="text-white/45 font-mono leading-[1.85] tracking-[0.03em]"
+              className="text-white/55 font-mono leading-[1.85] tracking-[0.03em]"
               style={{ fontSize: "clamp(11px, 2.5vw, 13px)", maxWidth: "400px" }}
             >
               {SCREEN_TEXTS[lang][displayIdx].desc}
@@ -1532,7 +1541,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
 
         {/* Project info */}
         <div ref={infoRef}>
-          <p className="text-white/30 text-[8px] font-mono tracking-[0.3em] uppercase mb-2">
+          <p className="text-white/55 text-[8px] font-mono tracking-[0.3em] uppercase mb-2">
             {project.num} · {project.category}
           </p>
           <h2
@@ -1541,14 +1550,14 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
           >
             {project.title}
           </h2>
-          <p className="text-white/35 text-[10px] font-mono tracking-[0.12em] mt-2">
+          <p className="text-white/55 text-[10px] font-mono tracking-[0.12em] mt-2">
             {project.tools} · {project.year}
           </p>
         </div>
 
         {/* Right side: hint + up button */}
         <div ref={hintRef} className="flex items-center gap-3">
-          <span className="text-white/30 text-[9px] font-mono tracking-[0.3em] uppercase">
+          <span className="text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase">
             <span className="pointer-coarse:hidden">{hintText}</span>
             <span className="hidden pointer-coarse:inline">{hintTextTouch}</span>
           </span>
@@ -1556,7 +1565,7 @@ function CuisineRoyaleView({ project, onClose }: { project: Project; onClose: ()
           {/* Up button — visible when past phase 0 */}
           <button
             onClick={handleGoTop}
-            aria-label="Revenir au début"
+            aria-label={t[lang].cuisine.goTop}
             style={{
               width: "30px", height: "30px",
               background: "#000",
@@ -1659,7 +1668,18 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
       </nav>
 
       {/* VIDEO — centered vertical */}
-      <div className="flex-1 flex items-center justify-center relative" onClick={togglePlay}>
+      <div
+        className="flex-1 flex items-center justify-center relative"
+        onClick={togglePlay}
+        role="button"
+        tabIndex={0}
+        aria-label={playing ? (lang === "fr" ? "Mettre la vidéo en pause" : "Pause the video") : (lang === "fr" ? "Lire la vidéo" : "Play the video")}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          togglePlay();
+        }}
+      >
         <video
           ref={videoRef}
           src={project.video}
@@ -1685,6 +1705,7 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
           <div className="relative flex-1 flex items-center justify-center" style={{ width: 20 }}>
             <input
               type="range" min={0} max={1} step={0.01}
+              aria-label="Volume"
               value={muted ? 0 : volume}
               onChange={(e) => handleVolume(parseFloat(e.target.value))}
               className="absolute"
@@ -1705,7 +1726,7 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
           <button
             onClick={toggleMute}
             className="bg-transparent border-none cursor-pointer p-1 flex items-center justify-center"
-            aria-label="Toggle mute"
+            aria-label={muted ? (lang === "fr" ? "Activer le son" : "Unmute") : (lang === "fr" ? "Couper le son" : "Mute")}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke={muted ? "#ef4444" : "white"}
@@ -1736,7 +1757,7 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
       >
         <div className="flex items-end justify-between pointer-events-auto">
           <div>
-            <p className="text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase mb-1">{lp.num} · {lp.category}</p>
+            <p className="text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase mb-1">{lp.num} · {lp.category}</p>
             <h1 className="text-white font-black uppercase leading-[0.88] tracking-[-0.025em]" style={{ fontSize: "clamp(28px, 4vw, 56px)" }}>
               {lp.title}
             </h1>
@@ -1744,7 +1765,9 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
           </div>
           <button
             onClick={() => setShowInfo(o => !o)}
-            className="text-[9px] font-mono tracking-[0.3em] uppercase text-white/50 hover:text-white bg-transparent border border-white/20 hover:border-white/60 px-4 py-2 cursor-pointer transition-colors"
+            aria-expanded={showInfo}
+            aria-label={showInfo ? (lang === "fr" ? "Fermer les infos" : "Close info") : t[lang].project.info}
+            className="text-[9px] font-mono tracking-[0.3em] uppercase text-white/60 hover:text-white bg-transparent border border-white/20 hover:border-white/60 px-4 py-2 cursor-pointer transition-colors"
           >
             {showInfo ? "×" : t[lang].project.info}
           </button>
@@ -1757,7 +1780,7 @@ function AnimationView({ project, onClose }: { project: Project; onClose: () => 
               { label: t[lang].project.year,   value: lp.year },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p className="text-white/40 text-[8px] font-mono tracking-[0.25em] uppercase mb-1">{label}</p>
+                <p className="text-white/55 text-[8px] font-mono tracking-[0.25em] uppercase mb-1">{label}</p>
                 <p className="text-white/90 text-[11px] font-mono">{value}</p>
               </div>
             ))}
@@ -1889,7 +1912,7 @@ function LumiView({ onClose }: { project: Project; onClose: () => void }) {
         {/* Brand sheet with floating logo overlaid on top hero section */}
         <div ref={titleRef} className="relative w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/Lumi/Desktop-2.webp" alt="Lumi" className="w-full block" />
+          <img src="/images/Lumi/Desktop-2.webp" alt={lang === "fr" ? "Planche d'identité de Lumi : logo, packaging, palette de couleurs et typographies" : "Lumi brand sheet: logo, packaging, colour palette and typography"} className="w-full block" />
 
           {/* MARQUEE — animated repeating LUMI! banner overlaid on white zone */}
           <div
@@ -2220,7 +2243,7 @@ function ProjectView({
           <h1 className="text-white font-black uppercase leading-[0.92] tracking-[-0.025em] text-balance"
             style={{ fontSize: "clamp(26px, 8vw, 48px)" }}
           >{lp.title}</h1>
-          <p className="text-white/45 text-[9px] font-mono tracking-[0.3em] uppercase mt-2">{lp.category}</p>
+          <p className="text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase mt-2">{lp.category}</p>
         </div>
 
         {/* ── Swiper vertical gallery (mobile only) ── */}
@@ -2236,7 +2259,7 @@ function ProjectView({
 
         {/* Counter */}
         <div className="flex items-center justify-between px-5 pt-1 pb-1 flex-shrink-0">
-          <span className="text-white/40 text-[9px] font-mono tracking-[0.25em]">
+          <span className="text-white/55 text-[9px] font-mono tracking-[0.25em]">
             {String(activeImage + 1).padStart(2,"0")} / {String(project.images.length).padStart(2,"0")}
           </span>
         </div>
@@ -2246,9 +2269,11 @@ function ProjectView({
           {/* Header: toggle row */}
           <button
             onClick={() => setMobileDescOpen(o => !o)}
+            aria-expanded={mobileDescOpen}
+            aria-controls="mobile-project-info"
             className="w-full flex items-center justify-between px-5 py-3 bg-transparent border-none cursor-pointer"
           >
-            <span className="text-white/40 text-[9px] font-mono tracking-[0.3em] uppercase">
+            <span className="text-white/55 text-[9px] font-mono tracking-[0.3em] uppercase">
               {t[lang].project.info}
             </span>
             <span
@@ -2261,6 +2286,7 @@ function ProjectView({
 
           {/* Collapsible content */}
           <div
+            id="mobile-project-info"
             className="overflow-hidden transition-all duration-350"
             style={{ maxHeight: mobileDescOpen ? "600px" : "0px", opacity: mobileDescOpen ? 1 : 0 }}
           >
@@ -2274,7 +2300,7 @@ function ProjectView({
                   { label: t[lang].project.tools, value: lp.tools },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-white/40 text-[9px] font-mono tracking-[0.22em] uppercase mb-1">{label}</p>
+                    <p className="text-white/55 text-[9px] font-mono tracking-[0.22em] uppercase mb-1">{label}</p>
                     <p className="text-white/90 text-[11px] font-mono leading-[1.4]">{value}</p>
                   </div>
                 ))}
@@ -2293,7 +2319,7 @@ function ProjectView({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={project.images[activeImage]}
-            alt={project.title}
+            alt={`${lp.title} — ${activeImage + 1} / ${project.images.length}`}
             className="object-contain pointer-events-auto"
             style={{
               filter: "brightness(1.0)",
@@ -2314,7 +2340,7 @@ function ProjectView({
             transition: "right 0.4s cubic-bezier(0.77,0,0.175,1)",
           }}
         >
-          <span className="text-white/35 text-[9px] font-mono tracking-[0.25em]">
+          <span className="text-white/55 text-[9px] font-mono tracking-[0.25em]">
             {String(activeImage + 1).padStart(2, "0")} / {String(project.images.length).padStart(2, "0")}
           </span>
         </div>
@@ -2350,7 +2376,7 @@ function ProjectView({
             >
               {project.title}
             </h1>
-            <p ref={categoryRef} className="text-white/45 text-[10px] font-mono tracking-[0.35em] uppercase mt-3">
+            <p ref={categoryRef} className="text-white/55 text-[10px] font-mono tracking-[0.35em] uppercase mt-3">
               {lp.category}
             </p>
           </div>
@@ -2378,19 +2404,19 @@ function ProjectView({
                 { label: t[lang].project.role, value: lp.role },
               ].map(({ label, value }) => (
                 <div key={label} className="min-w-0">
-                  <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{label}</p>
+                  <p className="text-white/55 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{label}</p>
                   <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4] break-words">{value}</p>
                 </div>
               ))}
             </div>
             {lp.deliverables && (
               <div>
-                <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.deliverables}</p>
+                <p className="text-white/55 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.deliverables}</p>
                 <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{lp.deliverables}</p>
               </div>
             )}
             <div>
-              <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.tools}</p>
+              <p className="text-white/55 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.tools}</p>
               <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{lp.tools}</p>
             </div>
             <p className="text-white/80 text-[12.5px] leading-[1.65]">{lp.description}</p>
@@ -2604,10 +2630,13 @@ function ProjectView({
               onWheel={e => e.stopPropagation()}
             >
               {project.images.map((img, i) => (
-                <div
+                <button
                   key={i}
+                  type="button"
                   onClick={() => { scrollDir.current = i > activeImage ? 1 : -1; setActiveImage(i); }}
-                  className="flex-shrink-0 cursor-pointer overflow-hidden transition-all duration-300"
+                  aria-label={`${lp.title} — ${i + 1} / ${project.images.length}`}
+                  aria-current={i === activeImage ? "true" : undefined}
+                  className="flex-shrink-0 cursor-pointer overflow-hidden transition-all duration-300 p-0 border-none bg-transparent"
                   style={{
                     height: "110px",
                     opacity: i === activeImage ? 1 : 0.35,
@@ -2616,7 +2645,7 @@ function ProjectView({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.replace("_1920.webp", "_640.webp")} alt="" draggable={false} className="w-full h-full object-cover" />
-                </div>
+                </button>
               ))}
             </div>
           </div>

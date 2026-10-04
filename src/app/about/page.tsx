@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import gsap from "gsap";
 import { NavContactButton } from "@/components/ui/nav-contact-button";
 import { useLang } from "@/contexts/LangContext";
@@ -18,7 +19,7 @@ function LangToggle({ className }: { className?: string }) {
         opacity: 1,
         textShadow: "0 0 8px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)",
       }}
-      aria-label="Switch language"
+      aria-label={lang === "en" ? "Passer le site en français" : "Switch the site to English"}
     >
       {lang === "en" ? "FR" : "EN"}
     </button>
@@ -32,19 +33,20 @@ const copy = {
       home:  "← Home",
       label: "Putri Zahara · About",
       homeAriaLabel: "Back to home",
+      legal: "Legal notice & privacy",
     },
     identity: {
       subtitle: "Concept Artist · UI/UX Designer",
       subtitleShort: "Concept Art · UI/UX",
       stats: [
-        { n: "3+", l: "Years"      },
-        { n: "6",  l: "Projects"   },
-        { n: "3",  l: "Core tools" },
+        { n: "3+", l: "Years"        },
+        { n: "6",  l: "Pro projects" },
+        { n: "3",  l: "Core tools"   },
       ],
       statsMobile: [
-        { n: "3+", l: "Years"    },
-        { n: "6",  l: "Projects" },
-        { n: "3",  l: "Tools"    },
+        { n: "3+", l: "Years"     },
+        { n: "6",  l: "Pro projects" },
+        { n: "3",  l: "Tools"     },
       ],
     },
     status: {
@@ -52,8 +54,8 @@ const copy = {
       label:    "Currently",
       school:   "Gaming Campus Lyon",
       year:     "4th year",
-      seeking:  "Seeking alternance",
-      seekingM: "· Seeking alternance",
+      seeking:  "Seeking work-study",
+      seekingM: "· Seeking work-study",
     },
     bio: {
       p1:   <>I&apos;ve always been drawn to worlds that feel lived-in, the kind where every corner has a story. I work across <strong className="font-bold text-white/90">concept art and UI/UX design</strong>, moving between environments, characters, and visual systems depending on where I&apos;m needed. <strong className="font-bold text-white/90">Photoshop, Procreate, and Blender</strong> are my daily tools; the real work is making something that resonates.</>,
@@ -75,19 +77,20 @@ const copy = {
       home:  "← Accueil",
       label: "Putri Zahara · À propos",
       homeAriaLabel: "Retour à l'accueil",
+      legal: "Mentions légales & confidentialité",
     },
     identity: {
       subtitle: "Concept Artist · UI/UX Designer",
       subtitleShort: "Concept Art · UI/UX",
       stats: [
-        { n: "3+", l: "Ans"     },
-        { n: "6",  l: "Projets" },
-        { n: "3",  l: "Outils"  },
+        { n: "3+", l: "Ans"         },
+        { n: "6",  l: "Projets pro" },
+        { n: "3",  l: "Outils"      },
       ],
       statsMobile: [
-        { n: "3+", l: "Ans"     },
-        { n: "6",  l: "Projets" },
-        { n: "3",  l: "Outils"  },
+        { n: "3+", l: "Ans"         },
+        { n: "6",  l: "Projets pro" },
+        { n: "3",  l: "Outils"      },
       ],
     },
     status: {
@@ -110,7 +113,7 @@ const copy = {
       quote:  "Putri a constamment produit un travail remarquable en suivant parfaitement les guides de style et d'identité visuelle de l'entreprise. Elle a une capacité remarquable à traduire une vision sur papier rapidement. Elle était essentielle au workflow 2D, transformant idées et références en rendus finaux que nos artistes 3D pouvaient reprendre sans friction. Ce qui distingue Putri, c'est son état d'esprit enthousiaste ; elle ne nécessite aucune microgestion et possède une excellente intuition pour savoir quand demander des retours et comment les appliquer.",
       quoteM: "Putri a constamment produit un travail remarquable, traduisant une vision sur papier rapidement. Essentielle au workflow 2D. Aucune microgestion nécessaire, excellente intuition pour les retours.",
       author: "Jasper Ising",
-      role:   "3D Environment Artist · Technical Artist — Olive Branch Interactive",
+      role:   "3D Environment Artist · Technical Artist — Olive Branch Interactive · traduit de l'anglais",
     },
   },
 } as const;
@@ -140,7 +143,7 @@ function Win({
     <div className={`border border-white/[0.11] flex flex-col ${className}`} style={style}>
       <div className="flex items-center gap-2 border-b border-white/[0.11] px-3 h-[26px] flex-shrink-0 bg-white/[0.025]">
         <div aria-hidden="true" className="w-[7px] h-[7px] border border-white/20 flex-shrink-0" />
-        <span className="flex-1 text-center text-[8px] font-mono tracking-[0.32em] uppercase text-white/30 leading-none select-none">
+        <span className="flex-1 text-center text-[8px] font-mono tracking-[0.32em] uppercase text-white/55 leading-none select-none">
           {title}
         </span>
         {badge}
@@ -154,7 +157,7 @@ function Win({
 function DotBadge({ label, pulse = false }: { label: string; pulse?: boolean }) {
   return (
     <span className="flex items-center gap-1.5 flex-shrink-0">
-      <span className="text-[7.5px] font-mono tracking-[0.22em] uppercase text-white/25">{label}</span>
+      <span className="text-[7.5px] font-mono tracking-[0.22em] uppercase text-white/55">{label}</span>
       <span className={`w-[5px] h-[5px] rounded-full bg-white/35 ${pulse ? "animate-pulse" : ""}`} />
     </span>
   );
@@ -226,7 +229,7 @@ export default function AboutPage() {
 
         <div className="flex items-center gap-3 select-none" aria-hidden="true">
           <span className="hidden md:block text-[10px] font-mono leading-none tracking-[0.08em] text-white/[0.07]">████████████</span>
-          <span className="text-[9.5px] font-mono tracking-[0.38em] text-white/40 uppercase">{c.nav.label}</span>
+          <span className="text-[9.5px] font-mono tracking-[0.38em] text-white/55 uppercase">{c.nav.label}</span>
           <span className="hidden md:block text-[10px] font-mono leading-none tracking-[0.08em] text-white/[0.07]">████████████</span>
         </div>
 
@@ -269,7 +272,7 @@ export default function AboutPage() {
           <Win title="identity.txt" className="flex-shrink-0">
             <div className="px-6 py-5 flex items-end justify-between gap-6">
               <div>
-                <p className="text-[8px] font-mono tracking-[0.38em] text-white/25 uppercase mb-2">
+                <p className="text-[8px] font-mono tracking-[0.38em] text-white/55 uppercase mb-2">
                   {c.identity.subtitle}
                 </p>
                 <h1
@@ -283,7 +286,7 @@ export default function AboutPage() {
                 {c.identity.stats.map(({ n, l }) => (
                   <div key={l} className="border border-white/[0.11] px-4 py-3 flex flex-col items-center gap-1 min-w-[72px]">
                     <span className="font-black text-white leading-none" style={{ fontSize: "clamp(22px, 2.2vw, 32px)" }}>{n}</span>
-                    <span className="text-[7.5px] font-mono tracking-[0.28em] uppercase text-white/30 text-center">{l}</span>
+                    <span className="text-[7.5px] font-mono tracking-[0.28em] uppercase text-white/55 text-center">{l}</span>
                   </div>
                 ))}
               </div>
@@ -294,10 +297,10 @@ export default function AboutPage() {
           <Win title="status.txt" badge={<DotBadge label={c.status.badge} pulse />} className="flex-shrink-0">
             <div className="px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-[8px] font-mono tracking-[0.32em] uppercase text-white/25">{c.status.label}</span>
+                <span className="text-[8px] font-mono tracking-[0.32em] uppercase text-white/55">{c.status.label}</span>
                 <span className="text-[12px] font-mono text-white/70">
                   <strong className="font-bold text-white/90">{c.status.school}</strong>
-                  <span className="text-white/40 ml-2">· <strong className="font-bold text-white/70">{c.status.year}</strong></span>
+                  <span className="text-white/55 ml-2">· <strong className="font-bold text-white/70">{c.status.year}</strong></span>
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -311,12 +314,12 @@ export default function AboutPage() {
 
           {/* readme.txt */}
           <Win title="readme.txt" className="flex-1 min-h-0 overflow-hidden">
-            <div className="px-6 py-5 h-full overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+            <div className="px-6 py-5 h-full overflow-y-auto" style={{ scrollbarWidth: "none" }} tabIndex={0} role="region" aria-label="readme.txt">
               <p className="text-[12.5px] lg:text-[13px] font-mono text-white/65 leading-[1.95] mb-4">{c.bio.p1}</p>
               <p className="text-[12.5px] lg:text-[13px] font-mono text-white/50 leading-[1.95] mb-4">{c.bio.p2}</p>
               <p className="text-[12.5px] lg:text-[13px] font-mono text-white/50 leading-[1.95]">{c.bio.p3}</p>
               <div className="mt-6 pt-5 border-t border-white/[0.08] flex items-center gap-3 flex-wrap">
-                <span className="text-[7.5px] font-mono tracking-[0.32em] uppercase text-white/25 mr-1">{c.bio.tools}</span>
+                <span className="text-[7.5px] font-mono tracking-[0.32em] uppercase text-white/55 mr-1">{c.bio.tools}</span>
                 {["Photoshop", "Illustrator", "Procreate", "Blender", "ZBrush", "After Effects"].map((t) => (
                   <span key={t} className="border border-white/[0.16] px-3 py-1 text-[8.5px] font-mono tracking-[0.22em] text-white/50 uppercase hover:text-white/80 hover:border-white/30 transition-colors">
                     {t}
@@ -338,24 +341,27 @@ export default function AboutPage() {
                 style={{ border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
                 aria-label="Jasper Ising"
               >
-                <span className="text-[9px] font-mono text-white/40">JI</span>
+                <span className="text-[9px] font-mono text-white/55">JI</span>
               </div>
-              <span className="text-[7px] font-mono tracking-[0.18em] text-white/25 uppercase text-center whitespace-nowrap">LinkedIn</span>
+              <span className="text-[7px] font-mono tracking-[0.18em] text-white/55 uppercase text-center whitespace-nowrap">LinkedIn</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-mono text-white/55 leading-[1.8] mb-3">
-                <span className="text-white/25 text-[14px] font-bold mr-1">&ldquo;</span>
+                <span aria-hidden="true" className="text-white/25 text-[14px] font-bold mr-1">&ldquo;</span>
                 {c.rec.quote}
-                <span className="text-white/25 text-[14px] font-bold ml-1">&rdquo;</span>
+                <span aria-hidden="true" className="text-white/25 text-[14px] font-bold ml-1">&rdquo;</span>
               </p>
               <div className="flex items-center gap-3">
                 <span className="text-[8.5px] font-bold font-mono tracking-[0.18em] text-white/75 uppercase">{c.rec.author}</span>
                 <span className="text-white/20 text-[8px]">·</span>
-                <span className="text-[8px] font-mono tracking-[0.12em] text-white/35">{c.rec.role}</span>
+                <span className="text-[8px] font-mono tracking-[0.12em] text-white/55">{c.rec.role}</span>
               </div>
             </div>
           </div>
         </Win>
+        <Link href="/legal" className="mt-2 block text-right text-[9px] font-mono tracking-[0.25em] uppercase text-white/55 hover:text-white transition-colors">
+          {c.nav.legal}
+        </Link>
       </div>
 
       {/* ════════════ MOBILE LAYOUT ════════════ */}
@@ -376,13 +382,13 @@ export default function AboutPage() {
         {/* Identity */}
         <Win title="identity.txt" className="flex-shrink-0">
           <div className="px-4 py-4">
-            <p className="text-[7.5px] font-mono tracking-[0.32em] text-white/25 uppercase mb-2">{c.identity.subtitleShort}</p>
+            <p className="text-[7.5px] font-mono tracking-[0.32em] text-white/55 uppercase mb-2">{c.identity.subtitleShort}</p>
             <h1 className="font-black uppercase text-white text-[40px] leading-[0.86] tracking-[-0.025em] mb-4">Putri<br />Zahara</h1>
             <div className="flex gap-2">
               {c.identity.statsMobile.map(({ n, l }) => (
                 <div key={l} className="border border-white/[0.11] flex-1 py-3 flex flex-col items-center gap-1">
                   <span className="font-black text-white text-[26px] leading-none">{n}</span>
-                  <span className="text-[7px] font-mono tracking-[0.25em] uppercase text-white/30">{l}</span>
+                  <span className="text-[7px] font-mono tracking-[0.25em] uppercase text-white/55">{l}</span>
                 </div>
               ))}
             </div>
@@ -404,10 +410,10 @@ export default function AboutPage() {
         <Win title="readme.txt" className="flex-shrink-0">
           <div className="px-4 py-4">
             <p className="text-[11px] font-mono text-white/60 leading-[1.95] mb-3">{c.bio.p1M}</p>
-            <p className="text-[11px] font-mono text-white/45 leading-[1.95] mb-4">{c.bio.p2M}</p>
+            <p className="text-[11px] font-mono text-white/55 leading-[1.95] mb-4">{c.bio.p2M}</p>
             <div className="pt-4 border-t border-white/[0.08] flex gap-2 flex-wrap">
               {["Photoshop", "Illustrator", "Procreate", "Blender", "ZBrush", "After Effects"].map((t) => (
-                <span key={t} className="border border-white/[0.16] px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/45 uppercase">{t}</span>
+                <span key={t} className="border border-white/[0.16] px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/55 uppercase">{t}</span>
               ))}
             </div>
           </div>
@@ -420,18 +426,22 @@ export default function AboutPage() {
               className="w-8 h-8 flex items-center justify-center flex-shrink-0"
               style={{ border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
             >
-              <span className="text-[8px] font-mono text-white/40">JI</span>
+              <span className="text-[8px] font-mono text-white/55">JI</span>
             </div>
             <div>
               <p className="text-[10px] font-mono text-white/50 leading-[1.8] mb-2">
                 &ldquo;{c.rec.quoteM}&rdquo;
               </p>
               <p className="text-[8px] font-bold font-mono tracking-[0.18em] text-white/65 uppercase">
-                {c.rec.author} <span className="font-normal text-white/30">· {c.rec.role}</span>
+                {c.rec.author} <span className="font-normal text-white/55">· {c.rec.role}</span>
               </p>
             </div>
           </div>
         </Win>
+
+        <Link href="/legal" className="py-2 text-center text-[9px] font-mono tracking-[0.25em] uppercase text-white/55 hover:text-white">
+          {c.nav.legal}
+        </Link>
       </div>
     </main>
   );

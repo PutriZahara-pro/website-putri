@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { LayoutPreloader } from "@/components/ui/layout-preloader";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import { NavContactButton } from "@/components/ui/nav-contact-button";
@@ -92,11 +93,10 @@ export default function Home() {
         className="relative h-[100dvh] w-screen max-w-full overflow-hidden"
         style={{ opacity: preloaderDone ? 1 : 0, transition: "opacity 0.25s ease" }}
       >
-        {/* Background image — decorative */}
+        {/* Background image — Putri's artwork */}
         <Image
           src="/images/landingpage/Harbor_thumbnail_final_obi_1920.webp"
-          alt=""
-          aria-hidden="true"
+          alt="Concept art by Putri Zahara: a medieval harbour town (Aporion)"
           fill
           sizes="100vw"
           preload
@@ -136,8 +136,11 @@ export default function Home() {
         />
 
         {/* ── COPYRIGHT ── */}
-        <p className="pointer-events-none absolute bottom-4 left-0 right-0 z-30 text-center text-[9px] font-mono tracking-[0.25em] uppercase text-white/35">
-          © {new Date().getFullYear()} Putri Zahara — All rights reserved
+        <p className="absolute bottom-4 left-0 right-0 z-30 text-center text-[9px] font-mono tracking-[0.25em] uppercase text-white/55">
+          © {new Date().getFullYear()} Putri Zahara — All rights reserved ·{" "}
+          <Link href="/legal" className="hover:text-white underline-offset-4 hover:underline transition-colors">
+            Legal
+          </Link>
         </p>
 
         {/* ── MAIN CONTENT ── */}

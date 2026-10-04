@@ -82,7 +82,7 @@ export default function MobileGallery({ images, title, activeImage, onSlideChang
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img}
-              alt={`${title} ${i + 1}`}
+              alt={`${title} — ${i + 1} / ${images.length}`}
               draggable={false}
               onLoad={() => swiperRef.current?.updateAutoHeight(0)}
               style={{ width: "100%", height: "auto", maxHeight: "70vh", objectFit: "contain", display: "block" }}
