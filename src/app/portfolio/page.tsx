@@ -2117,8 +2117,9 @@ function ProjectView({
         <div className="px-5 pt-3 pb-2 flex-shrink-0"
           style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%)" }}
         >
-          <h1 className="text-white font-black uppercase leading-[0.92] tracking-[-0.025em]"
-            style={{ fontSize: "clamp(26px, 8vw, 48px)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+          {/* Wraps instead of truncating — long titles ("The Ethians Redeemed") got cut with "…" on phones */}
+          <h1 className="text-white font-black uppercase leading-[0.92] tracking-[-0.025em] text-balance"
+            style={{ fontSize: "clamp(26px, 8vw, 48px)" }}
           >{lp.title}</h1>
           <p className="text-white/45 text-[9px] font-mono tracking-[0.3em] uppercase mt-2">{lp.category}</p>
         </div>
@@ -2251,7 +2252,7 @@ function ProjectView({
               {project.title}
             </h1>
             <p ref={categoryRef} className="text-white/45 text-[10px] font-mono tracking-[0.35em] uppercase mt-3">
-              {project.category}
+              {lp.category}
             </p>
           </div>
         </div>
@@ -2259,11 +2260,13 @@ function ProjectView({
         {/* LEFT — metadata column.
             Width scales with viewport (20vw) to stay clear of image's left edge (image at 58% centered → left edge at 21vw).
             On narrow viewports, column shrinks; on wide, it's larger.
-            Single-col stack inside avoids column-squeeze layout bugs. */}
+            Single-col stack inside avoids column-squeeze layout bugs.
+            Top follows the title size (same clamp as the h1 above) so the
+            category line never overlaps the first label on laptop screens. */}
         <div
           className="absolute left-0 bottom-0 z-10 flex flex-col px-7 pb-10 pointer-events-none overflow-y-auto"
           style={{
-            top:          "clamp(110px, 13vh, 165px)",
+            top:          "calc(clamp(34px, 5.2vw, 78px) * 0.92 + 80px)",
             width:        "min(20vw, 380px)",
             scrollbarWidth: "none",
           }}
@@ -2271,9 +2274,9 @@ function ProjectView({
           <div ref={metaRef} className="space-y-5 pointer-events-auto" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.95), 0 2px 20px rgba(0,0,0,0.8)" }}>
             <div className="grid gap-y-3" style={{ gridTemplateColumns: "1fr" }}>
               {[
-                { label: project.client ? "Client" : "Type", value: project.client ?? project.type },
-                { label: "Year", value: project.year },
-                { label: "Role", value: project.role },
+                { label: lp.client ? t[lang].project.client : t[lang].project.type, value: lp.client ?? lp.type },
+                { label: t[lang].project.year, value: lp.year },
+                { label: t[lang].project.role, value: lp.role },
               ].map(({ label, value }) => (
                 <div key={label} className="min-w-0">
                   <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{label}</p>
@@ -2281,15 +2284,15 @@ function ProjectView({
                 </div>
               ))}
             </div>
-            {project.deliverables && (
+            {lp.deliverables && (
               <div>
-                <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">Deliverables</p>
-                <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{project.deliverables}</p>
+                <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.deliverables}</p>
+                <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{lp.deliverables}</p>
               </div>
             )}
             <div>
-              <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">Tools</p>
-              <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{project.tools}</p>
+              <p className="text-white/40 text-[9px] font-mono tracking-[0.25em] uppercase mb-1.5">{t[lang].project.tools}</p>
+              <p className="text-white/90 text-[12px] font-mono tracking-[0.04em] leading-[1.4]">{lp.tools}</p>
             </div>
             <p className="text-white/80 text-[12.5px] leading-[1.65]">{lp.description}</p>
             {/* Progress dots — windowed max 12 centered on active */}
@@ -2626,22 +2629,36 @@ export default function Portfolio() {
     tl.to(sl, { y: 0,      duration: 0.85, ease: "power3.inOut" }, 0);
   }, []);
 
-  /* Q = prev · D = next (slider only) */
+  /* Q / ← = prev · D / → = next (slider only) */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (openProject) return;
-      if (e.key === "q" || e.key === "Q") prevProject();
-      if (e.key === "d" || e.key === "D") nextProject();
+      // Typing in the contact form must not move the slider behind it
+      const el = e.target as HTMLElement | null;
+      if (el?.closest("input, textarea, select, [contenteditable='true']")) return;
+      if (e.key === "q" || e.key === "Q" || e.key === "ArrowLeft")  prevProject();
+      if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") nextProject();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [openProject, prevProject, nextProject]);
 
+  // Warm the browser cache with the images of the project the visitor
+  // lingers on, so opening it is instant. Preloading every project up front
+  // downloaded ~13 MB of full-size images on arrival, even on mobile data.
+  const [warmIdx, setWarmIdx] = useState<number | null>(null);
+  useEffect(() => {
+    const id = window.setTimeout(() => setWarmIdx(activeIdx), 400);
+    return () => window.clearTimeout(id);
+  }, [activeIdx]);
+  const warmImages = (warmIdx !== null ? filteredProjects[warmIdx]?.images ?? [] : [])
+    .filter((src) => !src.endsWith(".webm"));
+
   return (
     <>
-      {/* ── Hidden image preloader — keeps all project images in browser cache ── */}
+      {/* ── Hidden image preloader — focused project only (see warmIdx) ── */}
       <div aria-hidden style={{ display: "none" }}>
-        {PROJECTS.flatMap((p) => p.images).map((src) => (
+        {warmImages.map((src) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={src} src={src} alt="" />
         ))}
