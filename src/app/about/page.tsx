@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import gsap from "gsap";
@@ -171,10 +171,6 @@ export default function AboutPage() {
   const { lang } = useLang();
   const c        = copy[lang];
   const wrapRef  = useRef<HTMLDivElement>(null);
-  const navRef   = useRef<HTMLElement>(null);
-  const photoRef = useRef<HTMLDivElement>(null);
-  const col2Ref  = useRef<HTMLDivElement>(null);
-  const recRef   = useRef<HTMLDivElement>(null);
 
   const goHome = useCallback(() => {
     const wrap = wrapRef.current;
@@ -182,28 +178,9 @@ export default function AboutPage() {
     gsap.to(wrap, { opacity: 0, duration: 0.38, ease: "power2.in", onComplete: () => router.push("/") });
   }, [router]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(navRef.current,
-        { opacity: 0, y: -12 },
-        { opacity: 1, y: 0, duration: 0.48, ease: "power2.out", delay: 0.1 },
-      );
-      gsap.fromTo(photoRef.current,
-        { opacity: 0, scale: 0.97, filter: "blur(6px)" },
-        { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.9, ease: "power3.out", delay: 0.18,
-          clearProps: "filter,transform,opacity" },
-      );
-      gsap.fromTo(col2Ref.current,
-        { opacity: 0, x: 18 },
-        { opacity: 1, x: 0, duration: 0.75, ease: "power3.out", delay: 0.3 },
-      );
-      gsap.fromTo(recRef.current,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.65, ease: "power3.out", delay: 0.55 },
-      );
-    });
-    return () => ctx.revert();
-  }, []);
+  // Entrance is plain CSS (about-* keyframes in globals.css): it runs from the
+  // first paint. The GSAP version only started after hydration, so the
+  // server-rendered text showed for a moment, vanished, then animated in.
 
   return (
     <main
@@ -215,7 +192,7 @@ export default function AboutPage() {
 
       {/* ════════════ NAV ════════════ */}
       <nav
-        ref={navRef}
+        style={{ animation: "about-fade-down 0.48s cubic-bezier(0.25,0.46,0.45,0.94) 0.1s both" }}
         aria-label="Navigation principale"
         className="relative z-20 flex-shrink-0 flex items-center justify-between px-6 sm:px-10 py-[14px] border-b border-white/[0.07]"
       >
@@ -252,7 +229,7 @@ export default function AboutPage() {
       <div className="relative z-10 flex-1 hidden md:flex gap-3 p-4 lg:p-5 overflow-hidden min-h-0">
 
         {/* Photo column */}
-        <div ref={photoRef} className="w-[38%] lg:w-[36%] flex-shrink-0 min-h-0">
+        <div className="w-[38%] lg:w-[36%] flex-shrink-0 min-h-0" style={{ animation: "about-photo-in 0.9s cubic-bezier(0.215,0.61,0.355,1) 0.18s both" }}>
           <Win title="putri-zahara.webp" badge={<DotBadge label="live feed" />} className="h-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -266,7 +243,7 @@ export default function AboutPage() {
         </div>
 
         {/* Right column */}
-        <div ref={col2Ref} className="flex-1 flex flex-col gap-3 min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col gap-3 min-h-0 overflow-hidden" style={{ animation: "about-slide-in 0.75s cubic-bezier(0.215,0.61,0.355,1) 0.3s both" }}>
 
           {/* identity.txt */}
           <Win title="identity.txt" className="flex-shrink-0">
@@ -332,7 +309,7 @@ export default function AboutPage() {
       </div>
 
       {/* ════════════ RECOMMENDATION ROW (desktop) ════════════ */}
-      <div ref={recRef} className="relative z-10 hidden md:block flex-shrink-0 px-4 lg:px-5 pb-4">
+      <div className="relative z-10 hidden md:block flex-shrink-0 px-4 lg:px-5 pb-4" style={{ animation: "about-fade-up 0.65s cubic-bezier(0.215,0.61,0.355,1) 0.55s both" }}>
         <Win title="linkedin_recommendation.txt">
           <div className="px-6 py-4 flex gap-5 items-start">
             <div className="flex-shrink-0 flex flex-col items-center gap-2">
