@@ -140,14 +140,6 @@ function Warning() {
   );
 }
 
-function Cross({ color }: { color: string }) {
-  return (
-    <svg viewBox="0 0 12 12" aria-hidden="true">
-      <path d="M2 2l8 8M10 2l-8 8" stroke={color} strokeWidth="2.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 /* ══════════════════════════════════════════════════════════════
@@ -420,8 +412,8 @@ export default function AboutView({ fontClass }: { fontClass: string }) {
           <div className="ab-box ab-box-blue rv rv-lock" style={d(480)} aria-hidden="true">
             <span className="ab-tag rv rv-wipe" style={d(820)}>{c.hero.subject}</span>
           </div>
-          <span className="ab-eye rv rv-pop" style={{ ...d(950), left: "46%", top: "40.2%" }} aria-hidden="true"><Cross color="#fff" /></span>
-          <span className="ab-eye rv rv-pop" style={{ ...d(1030), left: "57.9%", top: "44%" }} aria-hidden="true"><Cross color="#fff" /></span>
+          {/* Censor bar across both eyes */}
+          <span className="ab-eyebar rv rv-write" style={{ ...d(950), "--rv-dur": "0.6s" } as CSSProperties} aria-hidden="true" />
           <svg className="ab-link-line" aria-hidden="true">
             <line className="ab-stroke rv rv-draw only-d" style={{ ...d(1000), "--rv-dur": "0.6s" } as CSSProperties} pathLength={1} x1="69%" y1="25%" x2="137%" y2="58%" stroke="#1d2bd9" strokeWidth="1.6" />
             <line className="ab-stroke rv rv-draw only-m" style={{ ...d(1000), "--rv-dur": "0.6s" } as CSSProperties} pathLength={1} x1="69%" y1="25%" x2="108%" y2="66%" stroke="#1d2bd9" strokeWidth="1.6" />

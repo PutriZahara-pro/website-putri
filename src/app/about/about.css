@@ -276,8 +276,13 @@
   font-family: var(--font-geist-mono), monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--red);
   background: var(--paper); padding: 1px 4px; white-space: nowrap;
 }
-.ab-eye { --s: max(22px, calc(var(--ph) * 0.07)); position: absolute; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); pointer-events: none; }
-.ab-eye svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.45)); }
+/* Centred between the eyes (46.1% 40.5% / 58.6% 44.4% of the 1024×1280 photo), tilted along the eye line */
+.ab-eyebar {
+  --w: calc(var(--ph) * 0.2); --h: calc(var(--ph) * 0.046);
+  position: absolute; left: 52.3%; top: 42.4%; width: var(--w); height: var(--h);
+  margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
+  background: #fff; transform: rotate(21.3deg); pointer-events: none;
+}
 .ab-link-line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ab-zoom {
   position: absolute; left: 106%; top: 58%; width: 31%; aspect-ratio: 1;
