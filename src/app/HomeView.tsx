@@ -10,7 +10,7 @@ import { NavContactButton } from "@/components/ui/nav-contact-button";
 import gsap from "gsap";
 
 
-export default function Home() {
+export default function HomeView() {
   const router = useRouter();
   const [preloaderDone, setPreloaderDone] = useState(false);
   const [activeBtn, setActiveBtn]         = useState<"portfolio" | "about">("portfolio");
